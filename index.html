@@ -519,6 +519,12 @@ input[type=file]{display:none}
 .mc-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .mc-linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;padding:4px;font-family:inherit}
 .mc-linkbtn:hover{text-decoration:underline}
+.mc-msbtn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f2937;
+  border:1.5px solid #d8dee8;border-radius:12px;padding:13px 15px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:var(--sh-s);transition:.15s}
+.mc-msbtn:hover{border-color:#bfc7d6;box-shadow:var(--sh-m);transform:translateY(-1px)}
+.mc-msbtn svg{width:18px;height:18px;flex:0 0 auto}
+.mc-or{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin:2px 0}
+.mc-or:before,.mc-or:after{content:"";height:1px;background:var(--line);flex:1}
 /* home / timetable button in overlay top bar */
 .mc-homebtn{display:inline-flex;align-items:center;gap:7px;height:var(--tap);padding:0 13px;border-radius:11px;
   border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--sh-s);transition:.15s;white-space:nowrap}
@@ -1345,7 +1351,7 @@ function handleSyncError(e,quiet){
       const now=Date.now();
       if(now-syncBlockedToastAt>4000){
         syncBlockedToastAt=now;
-        if(user && !user.emailVerified) toast('Not syncing — verify your email first (check your Junk / Spam folder)');
+        if(user && !authIsTrusted(user)) toast('Not syncing — verify your email first (check your Junk / Spam folder)');
         else toast('Not syncing — sign in with your verified @'+ALLOWED_DOMAIN+' email');
       }
     }
@@ -1358,7 +1364,7 @@ function handleSyncError(e,quiet){
 async function refreshAuth(){
   if(!user)return;
   try{ await user.reload(); }catch(e){}
-  try{ if(user && user.emailVerified) await user.getIdToken(true); }catch(e){}
+  try{ if(user && authIsTrusted(user)) await user.getIdToken(true); }catch(e){}
 }
 
 /* ---------- Firebase state ---------- */
@@ -1380,6 +1386,11 @@ async function refreshAuth(){
 	    db=firebase.firestore();
 	    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 	    auth.onAuthStateChanged(onAuthChange);
+	    auth.getRedirectResult().then(result=>{
+	      if(result&&result.user)completeMicrosoftSignIn(result,true);
+	    }).catch(e=>{
+	      if(e&&e.code!=='auth/no-auth-event')authErr(e);
+	    });
 	    return true;
 	  }catch(e){console.error('Firebase init failed',e);return false;}
 	}
@@ -1426,7 +1437,7 @@ async function refreshAuth(){
 	  try{
 	    await db.collection('users').doc(user.uid).set(Object.assign({},payload,{
 	      email:user.email||'',
-	      emailVerified:!!user.emailVerified
+	      emailVerified:authIsTrusted(user)
 	    }),{merge:true});
 	    profile=Object.assign({},profile||{},payload);
 	    setSync('saved');
@@ -1520,6 +1531,25 @@ async function saveNotes(){
 	  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return false;
 	  return !REQUIRE_COLLEGE_EMAIL || e.endsWith('@'+ALLOWED_DOMAIN);
 	}
+	function authIsMicrosoft(u){
+	  return !!(u&&u.providerData&&u.providerData.some(p=>p&&p.providerId==='microsoft.com'));
+	}
+	function authIsTrusted(u){
+	  return !!(u&&(u.emailVerified||authIsMicrosoft(u)));
+	}
+	function rollFromEmail(email){
+	  const m=String(email||'').match(/(?:^|[._-])(\d{6,})(?=@)/);
+	  return m?m[1]:'';
+	}
+	function microsoftEmailFromResult(result){
+	  const p=(result&&result.additionalUserInfo&&result.additionalUserInfo.profile)||{};
+	  return String((result&&result.user&&result.user.email)||p.mail||p.userPrincipalName||p.email||p.preferred_username||'').trim().toLowerCase();
+	}
+	function microsoftProvider(){
+	  const provider=new firebase.auth.OAuthProvider('microsoft.com');
+	  provider.setCustomParameters({tenant:'organizations',prompt:'select_account'});
+	  return provider;
+	}
 	function emailRuleText(){
 	  return REQUIRE_COLLEGE_EMAIL ? 'Use your @'+ALLOWED_DOMAIN+' email' : 'Enter a valid email address';
 	}
@@ -1548,6 +1578,9 @@ async function saveNotes(){
 	    'auth/operation-not-allowed':'Sign-up is temporarily unavailable. Please try again later.',
 	    'auth/network-request-failed':'Network problem. Check your connection and try again.',
 	    'auth/unauthorized-domain':'Sign-in isn’t enabled for this web address yet. Please try again later.',
+	    'auth/account-exists-with-different-credential':'This email already has an account. Log in with your existing method once, then we can link Microsoft.',
+	    'auth/popup-blocked':'Popup was blocked. Redirecting to Microsoft sign-in.',
+	    'auth/popup-closed-by-user':'Microsoft sign-in was closed before finishing.',
 	    'auth/quota-exceeded':'We’ve hit today’s email limit. Please try again later.',
 	    'auth/internal-error':'Something went wrong on our end. Please try again.'
 	  };
@@ -1605,13 +1638,89 @@ async function saveNotes(){
 		    setAuthStatus('Logging you in...', 'info');
 		    pendingAuthFlow='login';
 		    const cred=await auth.signInWithEmailAndPassword(cleanEmail,pw);
-		    if(!cred.user.emailVerified)await sendVerificationEmail(cred.user,cleanEmail,false);
-		    mcTrack('login',{verified:cred.user.emailVerified?'yes':'no'});
+		    if(!authIsTrusted(cred.user))await sendVerificationEmail(cred.user,cleanEmail,false);
+		    mcTrack('login',{verified:authIsTrusted(cred.user)?'yes':'no'});
 		    rememberAuthEmail(cleanEmail);
 		    // onAuthStateChanged handles the rest
 		    return true;
 		  }catch(e){authErr(e);return false;}
 		}
+
+	async function completeMicrosoftSignIn(result,fromRedirect){
+	  const u=result&&result.user;
+	  const cleanEmail=microsoftEmailFromResult(result);
+	  if(!u||!cleanEmail){
+	    setAuthStatus('Microsoft did not return an email address. Try email/password instead.','bad');
+	    toast('Microsoft did not return an email');
+	    return false;
+	  }
+	  if(!emailOk(cleanEmail)){
+	    await auth.signOut().catch(()=>{});
+	    const msg='Use your @'+ALLOWED_DOMAIN+' Microsoft account';
+	    setAuthStatus(msg,'bad');
+	    toast(msg);
+	    return false;
+	  }
+	  pendingAuthFlow='login';
+	  verificationNotice='';
+	  rememberAuthEmail(cleanEmail);
+	  const profileSeed={
+	    name:u.displayName||cleanEmail.split('@')[0],
+	    roll:rollFromEmail(cleanEmail),
+	    email:cleanEmail,
+	    authProvider:'microsoft.com',
+	    emailVerified:true,
+	    updatedAt:Date.now()
+	  };
+	  try{
+	    const ref=db.collection('users').doc(u.uid);
+	    const snap=await ref.get();
+	    if(snap.exists){
+	      await ref.set(profileSeed,{merge:true});
+	    }else{
+	      await ref.set(Object.assign({},plannerPayload(),profileSeed,{createdAt:Date.now()}),{merge:true});
+	    }
+	    profile=Object.assign({},profile||{},profileSeed);
+	    setSync('saved');
+	  }catch(e){
+	    handleSyncError(e,true);
+	  }
+	  mcTrack('login_microsoft',{college_email:'yes',redirect:fromRedirect?'yes':'no'});
+	  toast('Signed in with Microsoft');
+	  updateAuthButton();
+	  renderSetupBanner();
+	  return true;
+	}
+
+	async function doMicrosoftLogin(){
+	  if(!auth)return false;
+	  try{
+	    setAuthStatus('Opening Microsoft sign-in...', 'info');
+	    pendingAuthFlow='login';
+	    const provider=microsoftProvider();
+	    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.matchMedia('(max-width: 760px)').matches;
+	    if(mobile){
+	      await auth.signInWithRedirect(provider);
+	      return true;
+	    }
+	    const result=await auth.signInWithPopup(provider);
+	    return await completeMicrosoftSignIn(result,false);
+	  }catch(e){
+	    if(e&&e.code==='auth/popup-blocked'){
+	      setAuthStatus('Popup blocked — redirecting to Microsoft...', 'info');
+	      await auth.signInWithRedirect(microsoftProvider());
+	      return true;
+	    }
+	    if(e&&e.code==='auth/operation-not-allowed'){
+	      const msg='Microsoft sign-in is not enabled in Firebase yet';
+	      setAuthStatus(msg,'bad');
+	      toast('Enable Microsoft login in Firebase');
+	      return false;
+	    }
+	    authErr(e);
+	    return false;
+	  }
+	}
 
 	async function doReset(email){
 	  const cleanEmail=(email||'').trim().toLowerCase();
@@ -1778,6 +1887,8 @@ function renderLanding(){
       <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
       <h2>Your week, sorted.</h2>
       <p>Attendance, daily schedule, class notes and calendar reminders \u2014 in one place, for IIM Mumbai.</p>
+      <button class="mc-msbtn" id="auMicrosoftLanding"><svg viewBox="0 0 23 23" fill="none"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+      <div class="mc-or">or</div>
       <button class="mc-cta" id="auStart">Get started</button>
       <button class="mc-linkbtn" id="auHaveAcc" style="margin-top:12px">I already have an account</button>
     </div>
@@ -1789,7 +1900,7 @@ function renderLanding(){
         </div>`).join('')}
 	    </div>
 	    <div class="mc-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="M9 12l2 2 4-4"/></svg>
-	      Private to you. Sign up with an email you can verify.</div>
+	      Private to you. Sign in with IIM Mumbai Microsoft or your college email.</div>
 	  </div>`;
 	}
 
@@ -1803,6 +1914,8 @@ function renderForm(){
       <button class="${isLogin?'':'on'}" data-m="signup">Sign up</button>
     </div>
     <div style="text-align:left;display:flex;flex-direction:column;gap:11px;margin-top:18px">
+      <button class="mc-msbtn" id="auMicrosoft"><svg viewBox="0 0 23 23" fill="none"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+      <div class="mc-or">or use email</div>
       ${isLogin?'':`
         <label class="mc-lab">Full name</label>
         <input class="mc-in" id="auName" placeholder="Pulkit" autocomplete="name">
@@ -1840,6 +1953,7 @@ function wireAuth(){
   // landing
   const start=$('auStart'); if(start)start.onclick=()=>{mcState='signup';render();};
   const have=$('auHaveAcc'); if(have)have.onclick=()=>{mcState='login';render();};
+  const msLanding=$('auMicrosoftLanding'); if(msLanding)msLanding.onclick=doMicrosoftLogin;
   // sent screen
   const toLogin=$('auToLogin'); if(toLogin)toLogin.onclick=()=>{mcState='login';render();};
   const reSignup=$('auReSignup'); if(reSignup)reSignup.onclick=()=>{mcState='signup';render();};
@@ -1849,6 +1963,7 @@ function wireAuth(){
     b.onclick=()=>{mcState=b.dataset.m;render();};
   });
 	  // password show/hide
+	  const ms=$('auMicrosoft'); if(ms)ms.onclick=doMicrosoftLogin;
 	  const eye=$('auEye'); if(eye)eye.onclick=()=>{const i=$('auPw'); if(!i)return; const show=i.type==='password'; i.type=show?'text':'password'; eye.classList.toggle('on',show); try{i.focus();}catch(e){}};
 	  // focus the first empty field for faster entry
 	  setTimeout(()=>{const nm=$('auName'), em=$('auEmail'); const first=(nm&&!nm.value)?nm:((em&&!em.value)?em:$('auPw')); try{first&&first.focus({preventScroll:true});}catch(e){}},60);
@@ -1885,11 +2000,11 @@ function wireAuth(){
 		    : clashes
 		      ? 'You have '+clashes+' clash'+(clashes>1?'es':'')+'. Resolve overlaps before moving to My Class.'
 		      : 'Looks clean. Save it once, then Today, Attendance, Notes and Calendar will use this week.';
-		  if(user&&!user.emailVerified){
+		  if(user&&!authIsTrusted(user)){
 		    $('setupText').textContent = (verificationNotice||'Check your inbox — and your spam/junk folder — for the verification link.')+' '+$('setupText').textContent;
 		  }
 		  const verify=$('setupVerify');
-		  if(verify)verify.hidden=!user||user.emailVerified;
+		  if(verify)verify.hidden=!user||authIsTrusted(user);
 		  const done=$('setupDone');
 		  done.disabled=!ready;
 		  done.textContent = ready ? 'Save and open My Class' : (clashes?'Resolve clashes':'Pick courses first');
@@ -2388,9 +2503,9 @@ function exportICS(){
 	  window.addEventListener('offline',()=>{ if(user)setSync('offline'); });
 	  // coming back from the "verify in junk folder" tab → pick up the verification and start syncing
 	  document.addEventListener('visibilitychange',()=>{
-	    if(document.hidden||!user||!db||user.emailVerified)return;
+	    if(document.hidden||!user||!db||authIsTrusted(user))return;
 	    refreshAuth().then(()=>{
-	      if(user&&user.emailVerified){
+	      if(user&&authIsTrusted(user)){
 	        updateAuthButton(); renderSetupBanner();
 	        saveAttendance(); saveNotes(); savePlannerData({},true);
 	        toast('Email verified — syncing now');
