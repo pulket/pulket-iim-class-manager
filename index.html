@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#EFF1F4">
+<title>Module 5 · Build your week — IIM Mumbai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Firebase (compat build = simplest for a single HTML file) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+window.PULKIT_GA_ID = 'G-ET9ELZEWM8';
+window.dataLayer = window.dataLayer || [];
+function gtag(){window.dataLayer.push(arguments);}
+function trackEvent(name,params){gtag('event',name,params||{});}
+gtag('js',new Date());
+gtag('config',window.PULKIT_GA_ID);
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ET9ELZEWM8"></script>
+<style>
+:root{
+  --bg:#EFF1F4; --surface:#FFFFFF; --surface-2:#F6F7F9; --surface-3:#F1F2F5;
+  --ink:#14161C; --ink-2:#555C6B; --ink-3:#8A909D; --ink-4:#B4B9C4;
+  --line:#E5E8ED; --line-2:#EDEFF3;
+  --accent:#2E54F0; --accent-soft:#E9EDFE;
+  --ok:#0E9D78; --ok-soft:#E4F5EF;
+  --warn:#E5484D; --warn-soft:#FCEDED; --warn-line:#F6C9CB;
+  --req:#6B5BD2; --req-soft:#ECE9FB; --req-line:#DAD3F6;
+  --r:15px; --rs:11px; --rxs:8px;
+  --sh-s:0 1px 2px rgba(18,22,38,.05);
+  --sh-m:0 6px 22px rgba(18,22,38,.07);
+  --sh-l:0 22px 60px rgba(18,22,38,.20);
+  --tap:44px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace}
+.disp{font-family:'Bricolage Grotesque','Inter',sans-serif}
+button{font-family:inherit;color:inherit}
+::selection{background:var(--accent-soft)}
+
+header{position:relative;z-index:30;background:rgba(239,241,244,.82);backdrop-filter:blur(14px) saturate(1.4);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.bar{max-width:1560px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;line-height:1;gap:5px}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.h1{font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:700;letter-spacing:-.025em}
+.flex1{flex:1 1 18px}
+.stats{display:flex;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh-s);overflow:hidden}
+.chip{padding:7px 15px;display:flex;flex-direction:column;align-items:flex-start;min-width:62px;border-right:1px solid var(--line-2)}
+.chip:last-child{border-right:0}
+.chip b{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.chip span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:4px;font-weight:600}
+.chip.warn b{color:var(--warn)}
+.chip.warn.zero b{color:var(--ink-4)}
+.tools{display:flex;gap:7px;flex-wrap:wrap}
+.btn{font-size:13px;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);
+  border-radius:11px;padding:9px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s;box-shadow:var(--sh-s);white-space:nowrap;min-height:var(--tap)}
+.btn:hover{border-color:#cdd2dd;transform:translateY(-1px);box-shadow:var(--sh-m)}
+.btn:active{transform:translateY(0)}
+.btn svg{width:15px;height:15px;stroke-width:1.85}
+.btn .caret{width:13px;height:13px;margin-left:-2px;opacity:.6}
+
+/* download dropdown */
+.dl-wrap{position:relative}
+.dl-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:60;min-width:248px;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-l);padding:6px;
+  opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:.16s cubic-bezier(.2,.7,.3,1);transform-origin:top right}
+.dl-wrap.open .dl-menu{opacity:1;transform:none;pointer-events:auto}
+.dl-wrap.open #bPng{border-color:#cdd2dd}
+.dl-opt{width:100%;display:flex;align-items:center;gap:11px;padding:10px 11px;border:0;background:transparent;
+  border-radius:10px;cursor:pointer;text-align:left;transition:.12s;min-height:var(--tap)}
+.dl-opt:hover{background:var(--surface-2)}
+.dl-opt:active{background:var(--surface-3)}
+.dl-ic{flex:0 0 36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center}
+.dl-ic svg{width:18px;height:18px;stroke-width:1.9}
+.dl-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dl-tx b{font-size:13px;font-weight:600;color:var(--ink)}
+.dl-tx small{font-size:11px;color:var(--ink-3);line-height:1.3}
+
+.secbar{max-width:1560px;margin:0 auto;padding:0 22px 13px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.secbar .lab{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.secbar .lab svg{width:16px;height:16px;color:var(--req);stroke-width:2}
+.secpills{display:flex;gap:6px;flex-wrap:wrap}
+.secpill{min-width:var(--tap);height:var(--tap);padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+  font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:.14s;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-s)}
+.secpill:hover{border-color:var(--req);transform:translateY(-1px)}
+.secpill.on{background:var(--req);border-color:var(--req);color:#fff;box-shadow:0 4px 14px rgba(107,91,210,.32)}
+.secpill.clear{font-family:'Inter';font-size:12.5px;font-weight:600;color:var(--ink-3);padding:0 13px}
+.secpill.clear:hover{color:var(--warn);border-color:var(--warn-line)}
+.secnote{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.secnote b{color:var(--req);font-weight:700}
+
+main{max-width:1560px;margin:0 auto;padding:20px 22px 40px;
+  display:grid;grid-template-columns:386px minmax(0,1fr);gap:20px;align-items:start}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-m);
+  display:flex;flex-direction:column;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:hidden}
+.panel-h{padding:16px 17px 13px;border-bottom:1px solid var(--line)}
+.panel-h .top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.panel-h h2{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;margin:0;letter-spacing:-.01em}
+.panel-h .cnt{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);font-weight:500}
+.xbtn{display:none}
+.search{position:relative;margin-top:12px}
+.search input{width:100%;font-size:16px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);
+  border-radius:10px;padding:11px 12px 11px 38px;outline:none;transition:.15s;min-height:var(--tap)}
+.search input::placeholder{color:var(--ink-3)}
+.search input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--ink-3)}
+.panel-body{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:13px 15px 22px}
+.panel-body::-webkit-scrollbar{width:10px}
+.panel-body::-webkit-scrollbar-thumb{background:#dfe2e8;border:3px solid var(--surface);border-radius:10px}
+
+.sgroup{margin-bottom:15px}
+.sgroup:last-child{margin-bottom:4px}
+.sh{display:flex;align-items:center;gap:9px;margin:0 1px 9px}
+.sh .sp{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;padding:3px 8px;border-radius:6px;letter-spacing:.02em}
+.sh .sm{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);font-weight:500}
+.sh .pick{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);font-weight:600;margin-left:auto;white-space:nowrap}
+.sh.req .pick{color:var(--req);opacity:.8}
+.sh.has .pick{display:none}
+.sh .sl{flex:1;height:1px;background:var(--line);min-width:6px}
+
+.crd{position:relative;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;
+  padding:11px 40px 11px 13px;margin-bottom:7px;cursor:pointer;transition:.14s;min-height:var(--tap)}
+.crd:hover{border-color:var(--cd);transform:translateY(-1px);box-shadow:var(--sh-s)}
+.crd.on{border-color:var(--cd);background:var(--cb);box-shadow:inset 3px 0 0 var(--cd)}
+.crd.on.bad{border-color:var(--warn);background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--warn)}
+.crd .ti{font-size:13px;font-weight:600;line-height:1.3;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.crd .reqtag{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--req);
+  background:var(--req-soft);border:1px solid var(--req-line);border-radius:5px;padding:2px 6px;text-transform:uppercase;white-space:nowrap}
+.crd .mid{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px}
+.crd .pf{font-size:11.5px;color:var(--ink-2)}
+.crd .se{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--cd);border:1px solid currentColor;border-radius:5px;padding:1px 5px}
+.crd .ss{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.crd .pl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-2);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap}
+.crd .pl em{color:var(--cd);font-style:normal;font-weight:700}
+.dot{position:absolute;right:11px;top:11px;width:23px;height:23px;border-radius:50%;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;transition:.14s;background:var(--surface)}
+.crd:hover .dot{border-color:var(--cd)}
+.crd.on .dot{background:var(--cd);border-color:var(--cd)}
+.crd.on.bad .dot{background:var(--warn);border-color:var(--warn)}
+.dot svg{width:13px;height:13px;color:#fff;opacity:0;transition:.14s;stroke-width:3}
+.crd.on .dot svg{opacity:1}
+.crd .bad-t{display:none;margin-top:8px;font-size:10.5px;color:var(--warn);font-weight:600;align-items:center;gap:5px}
+.crd.on.bad .bad-t{display:flex}
+.nomatch{padding:34px 16px;text-align:center;color:var(--ink-3);font-size:13px}
+
+.weekcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-m);overflow:hidden}
+.weekcard-h{display:flex;align-items:center;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)}
+.weekcard-h h2{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em}
+.weekcard-h .sub{font-size:12px;color:var(--ink-3);font-family:'JetBrains Mono',monospace}
+.weekcard-h .sub.alert{color:var(--warn);font-weight:600}
+.weekcard-h .legend{margin-left:auto;display:flex;align-items:center;gap:13px;font-size:11px;color:var(--ink-3)}
+.weekcard-h .legend .lg{display:flex;align-items:center;gap:6px}
+.weekcard-h .legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.weekcard-h .legend i.cl{background:var(--warn)}
+.weekcard-h .legend i.rq{background:var(--req)}
+
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid{display:grid;grid-template-columns:62px repeat(5,minmax(150px,1fr));min-width:820px}
+.gcell{border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+.col-head{position:sticky;top:0;z-index:6;background:var(--surface-2);padding:12px 10px 11px;text-align:center}
+.col-head .d{font-family:'Bricolage Grotesque',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.01em}
+.col-head .n{font-size:9.5px;color:var(--ink-3);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.corner{position:sticky;left:0;top:0;z-index:8;background:var(--surface-2)}
+.time-col{position:sticky;left:0;z-index:5;background:var(--surface-2);padding:9px 8px 0;text-align:right}
+.time-col .a{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--ink-2)}
+.time-col .b{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-4);margin-top:1px}
+.slotcell{min-height:92px;padding:6px;background:var(--surface);display:flex;flex-direction:column;gap:5px}
+.slotcell:hover{background:#FCFCFE}
+.slotcell.clash{background:var(--warn-soft)}
+
+.lunch{grid-column:1 / -1;display:flex;align-items:center;gap:11px;padding:6px 16px;background:var(--surface-3);
+  border-bottom:1px solid var(--line-2);border-top:1px solid var(--line-2)}
+.lunch .ln{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--line-2),var(--line-2) 4px,transparent 4px,transparent 9px)}
+.lunch .t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+
+.blk{position:relative;border-radius:9px;padding:8px 9px 8px 12px;background:var(--bg2);border:1px solid var(--bd);
+  animation:rise .24s cubic-bezier(.2,.7,.3,1) both;flex:1;min-height:0;display:flex;flex-direction:column}
+@keyframes rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.blk:before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3.5px;border-radius:4px;background:var(--ac)}
+.blk .nm{font-size:12px;font-weight:650;line-height:1.24;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.blk .row{margin-top:auto;padding-top:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.room{display:inline-flex;align-items:center;gap:3px;background:var(--ac);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;font-weight:700;padding:2px 7px 2px 5px;border-radius:7px;letter-spacing:.02em}
+.room svg{width:10px;height:10px;stroke-width:2.3}
+.prof{font-size:10px;color:var(--ink-2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.blk .tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-3);margin-top:4px;font-weight:500}
+.blk .tag em{color:var(--req);font-style:normal;font-weight:700}
+.clashlabel{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--warn);text-align:center;padding:1px 0 2px}
+
+.empty{grid-column:2 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:78px 20px;text-align:center;color:var(--ink-3);background:var(--surface)}
+.empty svg{width:36px;height:36px;color:var(--line);stroke-width:1.2;margin-bottom:14px}
+.empty h3{font-family:'Bricolage Grotesque',sans-serif;margin:0 0 6px;font-size:16px;color:var(--ink-2);font-weight:600}
+.empty p{margin:0;font-size:13px;max-width:300px;line-height:1.5}
+
+.mweek{display:none}
+.editbar{display:none}
+.scrim{position:fixed;inset:0;background:rgba(18,22,38,.32);opacity:0;pointer-events:none;transition:.25s;z-index:40}
+
+footer{max-width:1560px;margin:0 auto;padding:6px 22px 38px;color:var(--ink-3);font-size:11px;
+  display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+footer a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
+input[type=file]{display:none}
+
+.toast{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;
+  font-size:13px;padding:11px 18px;border-radius:11px;opacity:0;pointer-events:none;transition:.25s;z-index:90;box-shadow:var(--sh-l);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1000px){
+  main{grid-template-columns:minmax(0,1fr)}
+  body.open{overflow:hidden}
+  .panel{position:fixed;top:0;left:0;bottom:0;width:min(420px,92vw);max-height:none;border-radius:0;z-index:50;
+    transform:translateX(-104%);transition:transform .3s cubic-bezier(.3,.8,.3,1);box-shadow:var(--sh-l);border:0;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  body.open .panel{transform:none}
+  body.open .scrim{opacity:1;pointer-events:auto}
+  .xbtn{display:flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);
+    cursor:pointer;align-items:center;justify-content:center;color:var(--ink-2)}
+  .xbtn svg{width:17px;height:17px;stroke-width:2}
+  .panel-h .top{align-items:center}
+  .weekcard .scroll{display:none}
+  .mweek{display:block;padding:8px 10px 14px}
+  .editbar{display:none;
+    align-items:center;gap:10px;background:var(--ink);color:#fff;padding:11px 12px 11px 17px;border-radius:16px;box-shadow:var(--sh-l)}
+  .editbar .et{font-size:13.5px;font-weight:500;display:flex;flex-direction:column;line-height:1.25}
+  .editbar .et small{font-size:10.5px;color:rgba(255,255,255,.6)}
+	  .editbar .ec{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;background:rgba(255,255,255,.16);
+	    border-radius:8px;padding:3px 9px}
+		.editbar .flex1{flex:1}
+		.editbar button{background:#fff;color:var(--ink);border:0;border-radius:11px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;min-height:var(--tap)}
+		  footer{padding-bottom:38px}
+		  .secbar{padding:0 16px 13px}
+		  .panel{top:0}
+		  .dl-menu{right:0;left:auto;min-width:236px}
+}
+@media(max-width:480px){
+  .dl-wrap{position:static}
+  .dl-menu{left:12px;right:12px;min-width:0}
+}
+@media(max-width:640px){
+  .bar{padding:11px 15px;gap:10px}
+  .h1{font-size:19px}
+  .kicker{font-size:9px}
+  main{padding:14px 12px 30px}
+  .tools .btn .lbl{display:none}
+  .tools .btn{padding:11px}
+  .stats{order:3;flex:1 1 100%}
+  .chip{flex:1;align-items:center}
+  .secbar{gap:9px}
+  .secbar .lab{flex:1 1 100%}
+  .weekcard-h{padding:13px 15px}
+  .weekcard-h .legend{display:none}
+}
+
+.mday{margin-bottom:14px}
+.mday-h{display:flex;align-items:baseline;gap:9px;padding:0 4px 8px;position:sticky;top:0;background:var(--surface);z-index:2}
+.mday-h .dd{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700}
+.mday-h .dn{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);font-weight:600}
+.mday-h .dl{flex:1;height:1px;background:var(--line)}
+.mrow{display:flex;gap:11px;margin-bottom:8px}
+.mrow .mt{flex:0 0 56px;text-align:right;padding-top:11px}
+.mrow .mt .a{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.mrow .mt .b{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-4);margin-top:1px}
+.mrow .mc{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.mblk{position:relative;border-radius:12px;padding:12px 13px 12px 15px;background:var(--bg2);border:1px solid var(--bd)}
+.mblk:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:4px;background:var(--ac)}
+.mblk .nm{font-size:14px;font-weight:650;line-height:1.3;color:var(--ink)}
+.mblk .mmeta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px}
+.mblk .room{font-size:11px;padding:3px 9px 3px 7px}
+.mblk .room svg{width:11px;height:11px}
+.mblk .prof{font-size:11.5px;white-space:normal}
+.mblk .tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-3);margin-top:6px;font-weight:500;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mblk .reqpill{display:inline-flex;align-items:center;gap:3px;background:var(--req);color:#fff;font-size:8.5px;font-weight:700;
+  letter-spacing:.04em;padding:2px 6px;border-radius:5px}
+.mblk.clash{border-color:var(--warn-line);background:var(--warn-soft)}
+.mclash{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--warn);padding:2px 0 4px}
+.mempty{text-align:center;padding:54px 24px;color:var(--ink-3)}
+.mempty svg{width:34px;height:34px;color:var(--line);stroke-width:1.3;margin-bottom:12px}
+.mempty h3{font-family:'Bricolage Grotesque',sans-serif;margin:0 0 6px;font-size:16px;color:var(--ink-2)}
+.mempty p{margin:0;font-size:13px;line-height:1.5}
+.mday-free{font-size:12px;color:var(--ink-4);padding:2px 4px 4px;font-style:italic}
+
+@media print{
+  header,.panel,.scrim,footer,.toast,.editbar,.secbar{display:none!important}
+  main{padding:0;max-width:none;display:block}.weekcard{border:none;box-shadow:none}
+  body{background:#fff}.blk{break-inside:avoid}
+  .mweek{display:none!important}.weekcard .scroll{display:block!important}
+}
+@media(max-width:1000px){
+  .mday-h{position:static}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* off-screen capture staging (never visible to user) */
+#capStage{position:fixed;left:-99999px;top:0;pointer-events:none;background:#fff}
+.cap{background:#fff;font-family:'Inter',sans-serif;color:var(--ink)}
+.cap-head{padding:22px 26px 16px;border-bottom:1px solid var(--line)}
+.cap-head .ck{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.cap-head .ct{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:7px}
+.cap-head .cs{font-size:13px;color:var(--ink-2);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.cap-foot{padding:13px 26px 20px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-4);letter-spacing:.04em}
+
+/* capture grid: same look as live grid but NO sticky cells (sticky breaks in html2canvas) */
+.cap-grid{display:grid;grid-template-columns:64px repeat(5,1fr)}
+.cap-grid .gcell{position:static!important}
+	.cap-grid .corner{position:static;background:var(--surface-2)}
+	.cap-grid .col-head{position:static}
+	.cap-grid .time-col{position:static}
+	.cap-grid .slotcell{min-height:104px}
+
+  .setup-banner{max-width:1560px;margin:18px auto 0;padding:0 22px}
+  .setup-banner[hidden]{display:none}
+  .setup-inner{background:var(--ink);color:#fff;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh-m)}
+  .setup-copy{min-width:0;flex:1}
+  .setup-copy b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:750;letter-spacing:-.02em;margin-bottom:4px}
+  .setup-copy span{display:block;font-size:13px;line-height:1.45;color:rgba(255,255,255,.72)}
+  .setup-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+  .setup-actions button{min-height:var(--tap);border-radius:12px;padding:11px 15px;font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.18);transition:.15s;font-family:inherit}
+  .setup-actions .primary{background:#fff;color:var(--ink)}
+  .setup-actions .primary:hover{transform:translateY(-1px)}
+  .setup-actions .primary:disabled{opacity:.48;cursor:not-allowed;transform:none}
+  .setup-actions .ghost{background:transparent;color:#fff}
+  .setup-actions .ghost:hover{background:rgba(255,255,255,.08)}
+  @media(max-width:720px){
+    .setup-banner{margin-top:12px;padding:0 12px}
+    .setup-inner{align-items:stretch;flex-direction:column;padding:15px}
+    .setup-actions{justify-content:stretch}
+    .setup-actions button{flex:1}
+  }
+
+	/* ============ MY CLASS — login / today / attendance / notes ============ */
+.mc-authbtn{font-size:13px;font-weight:600;color:#fff;background:var(--accent);border:1px solid var(--accent);
+  border-radius:11px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s;
+  box-shadow:0 4px 14px rgba(46,84,240,.28);white-space:nowrap;min-height:var(--tap)}
+.mc-authbtn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(46,84,240,.34)}
+.mc-authbtn:active{transform:translateY(0)}
+.mc-authbtn svg{width:16px;height:16px}
+.mc-authbtn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:var(--sh-s)}
+.mc-authbtn.ghost:hover{border-color:#cdd2dd;box-shadow:var(--sh-m)}
+.mc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--line)}
+
+/* full-screen overlay */
+.mc-overlay{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;flex-direction:column;
+  overflow:hidden;padding-top:env(safe-area-inset-top)}
+.mc-overlay.open{display:flex}
+.mc-top{flex:0 0 auto;background:rgba(239,241,244,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  padding:13px 18px;display:flex;align-items:center;gap:13px}
+.mc-top .mc-ttl{display:flex;flex-direction:column;line-height:1;gap:5px;min-width:0}
+.mc-top .mc-ttl .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.mc-top .mc-ttl .t{font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-top .sp{flex:1}
+.mc-xbtn{width:var(--tap);height:var(--tap);border-radius:11px;border:1px solid var(--line);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-s);transition:.15s}
+.mc-xbtn:hover{border-color:#cdd2dd}
+.mc-xbtn svg{width:18px;height:18px;stroke:var(--ink-2);stroke-width:2}
+
+/* tab bar */
+.mc-tabs{flex:0 0 auto;display:flex;gap:6px;padding:11px 18px;background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto}
+.mc-tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;border:1.5px solid var(--line);
+  background:var(--surface);font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:.14s;min-height:42px;white-space:nowrap}
+.mc-tab svg{width:16px;height:16px;stroke-width:2}
+.mc-tab:hover{border-color:#cdd2dd}
+.mc-tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.mc-body{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 18px calc(40px + env(safe-area-inset-bottom))}
+.mc-wrap{max-width:760px;margin:0 auto}
+
+/* login screen */
+.mc-login{max-width:430px;margin:5vh auto 0;text-align:center;padding:0 8px}
+/* landing */
+.mc-land{max-width:520px;margin:0 auto;padding:2vh 4px 0}
+.mc-hero{text-align:center;padding:14px 8px 4px}
+.mc-hero .glyph{width:72px;height:72px;border-radius:22px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.mc-hero .glyph svg{width:36px;height:36px;stroke-width:1.8}
+.mc-hero h2{font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.035em;margin:0 0 11px;line-height:1.05}
+.mc-hero p{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0 auto 24px;max-width:380px}
+	.mc-cta{width:100%;background:var(--accent);color:#fff;border:0;border-radius:13px;padding:15px;
+	  font-size:15.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(46,84,240,.3);transition:.15s;font-family:inherit}
+	.mc-cta:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(46,84,240,.36)}
+	.mc-cta:active{transform:translateY(0)}
+	.mc-cta:disabled{opacity:.62;cursor:not-allowed;transform:none;box-shadow:none}
+.mc-feats{display:flex;flex-direction:column;gap:11px;margin:28px 0 22px}
+.mc-feat{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:15px;padding:15px 16px;box-shadow:var(--sh-s);text-align:left}
+.mc-feat .ic{flex:0 0 42px;height:42px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center}
+.mc-feat .ic svg{width:21px;height:21px;stroke-width:1.9}
+.mc-feat .tx{min-width:0}
+.mc-feat .tx b{display:block;font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:3px}
+.mc-feat .tx span{display:block;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.mc-trust{display:flex;align-items:flex-start;gap:9px;justify-content:center;font-size:12.5px;color:var(--ink-3);
+  line-height:1.5;text-align:left;max-width:400px;margin:0 auto;padding-bottom:8px}
+.mc-trust svg{width:17px;height:17px;flex:0 0 17px;color:var(--ok);stroke-width:1.9;margin-top:1px}
+.mc-trust b{color:var(--ink-2)}
+/* form chrome */
+.glyph.sm{width:56px;height:56px;border-radius:17px;margin:0 auto 4px}
+.glyph.sm svg{width:28px;height:28px}
+.glyph.ok{background:var(--ok-soft);color:var(--ok)}
+.mc-back{display:inline-flex;align-items:center;gap:5px;background:none;border:0;color:var(--ink-2);font-weight:600;
+  font-size:13.5px;cursor:pointer;font-family:inherit;float:left;padding:6px 2px;margin-bottom:6px}
+.mc-back svg{width:17px;height:17px;stroke-width:2.2}
+.mc-back:hover{color:var(--ink)}
+.mc-seg{display:flex;gap:4px;background:var(--surface-3);border-radius:13px;padding:4px;margin:14px auto 0;max-width:280px}
+.mc-seg button{flex:1;border:0;background:transparent;border-radius:10px;padding:10px;font-size:14px;font-weight:600;
+  color:var(--ink-3);cursor:pointer;font-family:inherit;transition:.14s}
+.mc-seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--sh-s)}
+.mc-lab{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:.01em;margin-bottom:-4px}
+.mc-login .glyph{width:74px;height:74px;border-radius:22px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 22px}
+.mc-login .glyph svg{width:36px;height:36px;stroke-width:1.8}
+.mc-login h2{font-family:'Bricolage Grotesque',sans-serif;font-size:27px;font-weight:700;letter-spacing:-.03em;margin:0 0 10px}
+.mc-login p{font-size:14.5px;line-height:1.55;color:var(--ink-2);margin:0 0 26px}
+.mc-google{display:inline-flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:13px;
+  padding:13px 22px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--sh-m);transition:.15s}
+.mc-google:hover{transform:translateY(-1px);box-shadow:var(--sh-l)}
+.mc-google img{width:20px;height:20px}
+	.mc-login .fine{margin-top:26px;font-size:12px;color:var(--ink-3);line-height:1.5}
+  .mc-status{border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.45;text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2)}
+  .mc-status[hidden]{display:none}
+  .mc-status.ok{background:var(--ok-soft);border-color:#BFE7D9;color:#08765C}
+  .mc-status.bad{background:var(--warn-soft);border-color:var(--warn-line);color:var(--warn)}
+  .mc-status.info{background:var(--accent-soft);border-color:#CAD5FF;color:#2444C8}
+
+/* section headings inside tabs */
+.mc-h{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink);
+  margin:4px 0 14px;display:flex;align-items:center;gap:9px}
+.mc-h .pill{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--ink-3);
+  background:var(--surface-3);padding:3px 9px;border-radius:7px}
+.mc-sub{font-size:13px;color:var(--ink-3);margin:-8px 0 16px}
+
+/* today cards */
+.mc-card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ac,var(--accent));
+  border-radius:15px;padding:15px 16px;margin-bottom:13px;box-shadow:var(--sh-s)}
+.mc-card .ct{display:flex;align-items:flex-start;gap:11px;margin-bottom:13px}
+.mc-card .ct .time{flex:0 0 auto;text-align:center;min-width:54px}
+.mc-card .ct .time b{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;display:block;line-height:1.1}
+.mc-card .ct .time span{font-size:10.5px;color:var(--ink-3);font-family:'JetBrains Mono',monospace}
+.mc-card .ct .info{flex:1;min-width:0}
+.mc-card .ct .info .nm{font-size:15px;font-weight:700;color:var(--ink);line-height:1.3;letter-spacing:-.01em}
+.mc-card .ct .info .meta{font-size:12.5px;color:var(--ink-2);margin-top:4px;display:flex;flex-wrap:wrap;gap:5px 12px}
+.mc-card .ct .info .meta em{font-style:normal;color:var(--ink-3)}
+.mc-att{display:flex;gap:8px}
+.mc-att button{flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 6px;
+  font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:.13s;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
+.mc-att button svg{width:15px;height:15px;stroke-width:2.2}
+/* colour-coded so it reads at a glance: present=green, absent=red, cancelled=blue */
+.mc-att button.pres{color:var(--ok);border-color:#BFE7D9}
+.mc-att button.abs{color:var(--warn);border-color:var(--warn-line)}
+.mc-att button.canc{color:var(--accent);border-color:#CAD5FF}
+.mc-att button.pres:hover{border-color:var(--ok);background:var(--ok-soft)}
+.mc-att button.abs:hover{border-color:var(--warn);background:var(--warn-soft)}
+.mc-att button.canc:hover{border-color:var(--accent);background:var(--accent-soft)}
+.mc-att button.on.pres{background:var(--ok);border-color:var(--ok);color:#fff}
+.mc-att button.on.abs{background:var(--warn);border-color:var(--warn);color:#fff}
+.mc-att button.on.canc{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* attendance list */
+.mc-arow{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:11px;box-shadow:var(--sh-s)}
+.mc-arow .top{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.mc-arow .top .nm{flex:1;font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.3}
+.mc-arow .pct{font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.mc-arow .pct.ok{color:var(--ok)} .mc-arow .pct.warn{color:#D97706} .mc-arow .pct.bad{color:var(--warn)} .mc-arow .pct.none{color:var(--ink-4)}
+.mc-bar{height:8px;border-radius:5px;background:var(--surface-3);overflow:hidden;position:relative;margin-bottom:9px}
+.mc-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;transition:width .4s cubic-bezier(.2,.7,.3,1)}
+.mc-bar .line75{position:absolute;left:85%;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);opacity:.5}
+.mc-arow .nums{display:flex;gap:14px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.mc-arow .nums b{color:var(--ink);font-weight:700}
+.mc-arow .nums .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.mc-overall{background:var(--ink);color:#fff;border-radius:16px;padding:18px 20px;margin-bottom:18px;display:flex;align-items:center;gap:18px}
+.mc-overall .big{font-family:'Bricolage Grotesque',sans-serif;font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.mc-overall .lab{font-size:13px;opacity:.8;line-height:1.4}
+.mc-overall .lab b{opacity:1}
+
+/* notes */
+.mc-note{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--sh-s)}
+.mc-note .nh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mc-note .nh .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.mc-note .nh .nm{flex:1;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.mc-note textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-family:inherit;
+  font-size:13.5px;line-height:1.5;color:var(--ink);background:var(--surface-2);resize:vertical;min-height:72px;outline:none;transition:.15s}
+.mc-note textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.mc-note .nf{display:flex;align-items:center;gap:10px;margin-top:9px}
+.mc-note .nf .saved{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px;opacity:0;transition:.2s}
+.mc-note .nf .saved.show{opacity:1}
+.mc-note .nf .saved svg{width:13px;height:13px;color:var(--ok);stroke-width:2.5}
+
+.mc-empty{text-align:center;padding:54px 20px;color:var(--ink-3)}
+.mc-empty svg{width:46px;height:46px;stroke-width:1.4;color:var(--ink-4);margin-bottom:14px}
+.mc-empty h3{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;color:var(--ink-2);margin:0 0 7px}
+.mc-empty p{font-size:13.5px;line-height:1.55;max-width:300px;margin:0 auto}
+
+.mc-ics{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:#fff;
+  border:0;border-radius:13px;padding:14px;font-size:14.5px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(46,84,240,.28);transition:.15s;margin-top:6px}
+.mc-ics:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(46,84,240,.34)}
+.mc-ics svg{width:18px;height:18px;stroke-width:2}
+.mc-signout{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;
+  font-size:13.5px;font-weight:600;color:var(--warn);cursor:pointer;margin-top:14px;transition:.15s}
+.mc-signout:hover{border-color:var(--warn-line);background:var(--warn-soft)}
+.mc-day-pick{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.mc-day-pick button{flex:1;min-width:54px;padding:9px 4px;border:1.5px solid var(--line);background:var(--surface);
+  border-radius:10px;font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:.13s}
+.mc-day-pick button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.mc-in{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-family:inherit;font-size:15px;
+  color:var(--ink);background:var(--surface);outline:none;transition:.15s}
+.mc-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.mc-linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;padding:4px;font-family:inherit}
+.mc-linkbtn:hover{text-decoration:underline}
+/* home / timetable button in overlay top bar */
+.mc-homebtn{display:inline-flex;align-items:center;gap:7px;height:var(--tap);padding:0 13px;border-radius:11px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--sh-s);transition:.15s;white-space:nowrap}
+.mc-homebtn:hover{border-color:#cdd2dd;box-shadow:var(--sh-m)}
+.mc-homebtn svg{width:16px;height:16px;stroke-width:2}
+/* quick actions row (Today) + backfill */
+.mc-actions{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.mc-actbtn{flex:1;min-width:150px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--sh-s);transition:.15s}
+.mc-actbtn:hover{border-color:#cdd2dd;box-shadow:var(--sh-m);transform:translateY(-1px)}
+.mc-actbtn svg{width:16px;height:16px;stroke-width:2;color:var(--accent)}
+.mc-actbtn.accent{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(46,84,240,.28)}
+.mc-actbtn.accent svg{color:#fff}
+@media(max-width:520px){.mc-homebtn .lbl{display:none}.mc-homebtn{padding:0 11px}}
+/* sync indicator */
+.mc-sync{align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-3);background:var(--surface);
+  border:1px solid var(--line);border-radius:9px;padding:5px 9px;white-space:nowrap}
+.mc-sync i{width:7px;height:7px;border-radius:50%;background:var(--ink-4);flex:0 0 auto}
+.mc-sync.saving i{background:#D97706}
+.mc-sync.saved{color:#08765C} .mc-sync.saved i{background:var(--ok)}
+.mc-sync.offline{color:var(--warn)} .mc-sync.offline i{background:var(--warn)}
+.mc-sync.blocked{color:var(--warn)} .mc-sync.blocked i{background:var(--warn)}
+@media(max-width:600px){.mc-sync .lbl{display:none}.mc-sync{padding:6px}}
+/* attendance safety line + micro-credit tag */
+.mc-safe{margin-top:10px;font-size:12px;font-weight:600;line-height:1.4;padding:8px 10px;border-radius:9px}
+.mc-safe.ok{background:var(--ok-soft);color:#08765C} .mc-safe.warn{background:#FDF3E7;color:#B45309} .mc-safe.bad{background:var(--warn-soft);color:var(--warn)}
+.mc-tag-micro{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--req);background:var(--req-soft);border:1px solid var(--req-line);border-radius:5px;padding:2px 6px;margin-left:7px;vertical-align:middle}
+.mc-arow .nums span:last-child b{color:var(--ink)}
+/* unmarked-classes nudge on Today */
+.mc-prompt{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;border-radius:14px;padding:13px 15px;margin-bottom:18px;box-shadow:var(--sh-m)}
+.mc-prompt-tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.mc-prompt-tx b{font-size:14px;font-weight:700}
+.mc-prompt-tx span{font-size:12px;color:rgba(255,255,255,.72);margin-top:2px}
+.mc-prompt-go{flex:0 0 auto;background:#fff;color:var(--ink);border:0;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+/* password show/hide */
+.mc-pw{position:relative}
+.mc-pw .mc-in{padding-right:44px}
+.mc-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;background:transparent;
+  border-radius:8px;color:var(--ink-3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mc-eye:hover{color:var(--ink-2);background:var(--surface-2)}
+.mc-eye.on{color:var(--accent)}
+.mc-eye svg{width:18px;height:18px;stroke-width:1.9}
+/* today/tomorrow toggle */
+.mc-daytoggle{max-width:260px;margin:2px 0 18px}
+/* inline note on class cards */
+.mc-card-noteedit{margin-top:10px}
+.mc-card-noteedit textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:13px;line-height:1.45;color:var(--ink);background:var(--surface-2);resize:vertical;min-height:38px;outline:none;transition:.15s}
+.mc-card-noteedit textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.mc-card-noteedit .saved{font-size:11px;color:var(--ok);opacity:0;transition:.2s;display:inline-flex;align-items:center;gap:4px;margin-top:5px}
+.mc-card-noteedit .saved svg{width:13px;height:13px;stroke-width:2.5}
+.mc-card-noteedit .saved.show{opacity:1}
+.mc-card-note{display:flex;gap:8px;margin-top:10px;padding:9px 11px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.mc-card-note svg{width:14px;height:14px;flex:0 0 14px;margin-top:2px;color:var(--accent);stroke-width:2}
+.mc-card-note span{white-space:pre-wrap;min-width:0}
+/* extra (off-timetable) class */
+.bf-extra{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.bf-extra-btns{display:flex;gap:8px}
+.bf-extra-add{flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink-2);transition:.13s}
+.bf-extra-add.pres:hover{border-color:var(--ok);color:var(--ok)}
+.bf-extra-add.abs:hover{border-color:var(--warn);color:var(--warn)}
+.bf-extra-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:13px}
+.bf-extra-row .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.bf-extra-row .nm{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bf-extra-row .st{font-size:11px;font-weight:700;text-transform:capitalize;padding:2px 8px;border-radius:6px}
+.bf-extra-row .st.present{background:var(--ok-soft);color:#08765C} .bf-extra-row .st.absent{background:var(--warn-soft);color:var(--warn)}
+.bf-extra-del{border:0;background:transparent;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
+.bf-extra-del:hover{color:var(--warn)}
+/* class note / reminder modal (opened from the timetable) */
+.cls-modal{position:fixed;inset:0;z-index:115;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(18,22,38,.34)}
+.cls-modal.open{display:flex}
+.cls-card{width:min(440px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-l);padding:18px;max-height:90vh;overflow:auto}
+.cls-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px}
+.cls-head .cls-ttl{flex:1;font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.cls-x{flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.cls-x svg{width:16px;height:16px}
+.cls-meta{font-size:12.5px;color:var(--ink-3);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:5px 12px}
+.cls-modal textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;line-height:1.5;color:var(--ink);background:var(--surface-2);resize:vertical;min-height:120px;outline:none}
+.cls-modal textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.cls-foot{display:flex;align-items:center;gap:12px;margin-top:14px}
+.cls-foot .cls-saved{flex:1;font-size:12px;color:var(--ink-3)}
+.cls-save{flex:0 0 auto;background:var(--accent);color:#fff;border:0;border-radius:11px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer}
+.cls-login{font-size:13px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center;margin-top:8px}
+/* compact inline hint (signup) */
+.mc-hint{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;line-height:1.45;color:var(--ink-2);
+  background:var(--accent-soft);border-radius:10px;padding:9px 11px;margin-top:6px;text-align:left}
+.mc-hint svg{width:14px;height:14px;flex:0 0 14px;margin-top:1px;color:var(--accent);stroke-width:1.9}
+.mc-hint b{color:var(--ink)}
+/* anchor used as a CTA (verify screen) */
+a.mc-cta{display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none}
+a.mc-cta svg{flex:0 0 auto}
+/* compact verify-email screen */
+.mc-verify{margin-top:4vh}
+.mc-verify .glyph{width:58px;height:58px;border-radius:17px;margin-bottom:15px}
+.mc-verify .glyph svg{width:28px;height:28px}
+.mc-verify h2{font-size:23px;margin-bottom:7px}
+.mc-verify p{font-size:14px;line-height:1.5;margin-bottom:18px}
+.mc-verify-login{display:block;margin:14px auto 0;font-size:14px}
+@media(max-width:640px){
+  .mc-login{margin-top:3vh}
+  .mc-login .glyph{width:58px;height:58px;border-radius:17px;margin-bottom:14px}
+  .mc-login .glyph svg{width:28px;height:28px}
+  .mc-login h2{font-size:22px}
+  .mc-login p{font-size:13.5px;margin-bottom:18px}
+}
+/* ===== attendance sheet (full dated register) ===== */
+.mc-attendtoggle{max-width:240px;margin:0 0 16px}
+.sheet-legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12px;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:16px;box-shadow:var(--sh-s)}
+.sheet-legend b{color:var(--ink);font-weight:700}
+.sheet-legend .g{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3)}
+.sheet-day{margin-bottom:15px}
+.sheet-dh{display:flex;align-items:center;gap:11px;margin:0 2px 9px}
+.sheet-dh .sd{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);text-transform:uppercase}
+.sheet-dh:after{content:"";flex:1;height:1px;background:var(--line)}
+.sheet-edit{border:0;background:transparent;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:6px}
+.sheet-edit:hover{background:var(--accent-soft)}
+.sheet-row{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:11px 13px;margin-bottom:7px;box-shadow:var(--sh-s);transition:.14s}
+.sheet-row:hover{transform:translateY(-1px);box-shadow:var(--sh-m)}
+.sheet-row .t{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--ink-2);flex:0 0 42px;text-align:center}
+.sheet-row .cdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.sheet-row .nm{flex:1;font-size:13px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-row .nm .xt{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-3);border-radius:5px;padding:1px 5px;margin-left:5px}
+.sheet-row .st{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;text-transform:capitalize;padding:4px 9px;border-radius:8px;flex:0 0 auto}
+.sheet-row .st svg{width:12px;height:12px;stroke-width:3}
+.sheet-row .st.present{background:var(--ok-soft);color:#08765C}
+.sheet-row .st.absent{background:var(--warn-soft);color:var(--warn)}
+.sheet-row .st.cancelled{background:var(--surface-3);color:var(--ink-3)}
+/* ===== modern visual polish ===== */
+.mc-overall{background:linear-gradient(135deg,#171a26 0%,#241f4a 55%,#2E54F0 135%);box-shadow:0 14px 34px rgba(30,40,120,.26);border:none;position:relative;overflow:hidden}
+.mc-overall:after{content:"";position:absolute;right:-40px;top:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%);pointer-events:none}
+.mc-overall .big{position:relative}
+.mc-overall .big.bad{color:#FFB4B4}.mc-overall .big.warn{color:#FFD79A}
+.mc-cta{background:linear-gradient(135deg,#3a63ff,#2E54F0);box-shadow:0 8px 22px rgba(46,84,240,.32)}
+.mc-cta:hover{box-shadow:0 12px 30px rgba(46,84,240,.4)}
+.mc-ics{background:linear-gradient(135deg,#3a63ff,#2E54F0)}
+.mc-actbtn.accent{background:linear-gradient(135deg,#3a63ff,#2E54F0)}
+.mc-arow{transition:.15s;border-radius:16px}
+.mc-arow:hover{transform:translateY(-1px);box-shadow:var(--sh-m)}
+.mc-card{border-radius:16px;transition:.15s}
+.mc-card:hover{box-shadow:var(--sh-m)}
+.mc-tab{transition:.16s}
+.mc-tab.on{background:linear-gradient(135deg,#262b3d,#14161c);border-color:#14161c;box-shadow:0 6px 16px rgba(18,22,38,.22)}
+.mc-tabs{scrollbar-width:none}.mc-tabs::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <span class="kicker">IIM Mumbai · PGDM Module 5</span>
+      <span class="h1 disp">Build your week</span>
+    </div>
+    <div class="flex1"></div>
+    <div class="stats">
+      <div class="chip"><b id="stC">0</b><span>Courses</span></div>
+      <div class="chip"><b id="stH">0</b><span>Hrs / wk</span></div>
+      <div class="chip warn zero" id="stClashWrap"><b id="stClash">0</b><span>Clashes</span></div>
+    </div>
+    <div class="tools">
+      <button class="btn" id="bLink" title="Copy a link that remembers your picks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span class="lbl">Share</span></button>
+      <div class="dl-wrap">
+        <button class="btn" id="bPng" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M12 3v12m0 0-4-4m4 4 4-4"/></svg><span class="lbl">Save image</span>
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="dl-menu" id="dlMenu">
+          <button class="dl-opt" id="dlMobile">
+            <span class="dl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="6" y="2.5" width="12" height="19" rx="2.4"/><path d="M11 18.5h2"/></svg></span>
+            <span class="dl-tx"><b>Mobile · day by day</b><small>Tall image, easy to read on a phone</small></span>
+          </button>
+          <button class="dl-opt" id="dlFull">
+            <span class="dl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg></span>
+            <span class="dl-tx"><b>Full week grid</b><small>Wide Mon–Fri timetable</small></span>
+          </button>
+        </div>
+      </div>
+      <button class="btn" id="bUp" title="Load another module's Excel file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 20h16"/></svg><span class="lbl">Load file</span></button>
+      <button class="mc-authbtn" id="mcOpen" title="Track attendance, notes & today's schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="lbl">My class</span></button>
+    </div>
+    <input type="file" id="file" accept=".xlsx,.xls">
+  </div>
+  <div class="secbar">
+    <span class="lab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      Your section
+    </span>
+    <div class="secpills" id="secpills"></div>
+	    <span class="secnote" id="secnote">Pick your section — your 3 compulsory courses get added automatically (you can still remove any).</span>
+	  </div>
+	</header>
+
+	<section class="setup-banner" id="setupBanner" hidden>
+	  <div class="setup-inner">
+	    <div class="setup-copy">
+	      <b id="setupTitle">Create your timetable</b>
+	      <span id="setupText">Pick your section and courses. Once your week has no clashes, continue to My Class.</span>
+	    </div>
+	    <div class="setup-actions">
+	      <button class="ghost" id="setupVerify" hidden>Resend email</button>
+	      <button class="ghost" id="setupEdit">Edit courses</button>
+	      <button class="primary" id="setupDone" disabled>Continue</button>
+	    </div>
+	  </div>
+	</section>
+	
+	<main>
+  <aside class="panel" id="panel">
+    <div class="panel-h">
+      <div class="top">
+        <h2 class="disp">Courses</h2>
+        <span class="cnt" id="elCnt"></span>
+        <button class="xbtn" id="bClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+        <input id="q" placeholder="Search course, professor or room…" autocomplete="off">
+      </div>
+    </div>
+    <div class="panel-body" id="list"></div>
+  </aside>
+
+  <section class="weekcard">
+    <div class="weekcard-h">
+      <h2 class="disp">Your week</h2>
+      <span class="sub" id="wkSub">nothing picked yet</span>
+      <span class="legend" id="legend" style="display:none">
+        <span class="lg"><i class="rq"></i> compulsory</span>
+        <span class="lg"><i class="cl"></i> clash</span>
+      </span>
+    </div>
+    <div class="scroll"><div class="grid" id="grid"></div></div>
+    <div class="mweek" id="mweek"></div>
+  </section>
+</main>
+
+	<div class="editbar" id="editbar">
+	  <span class="et">Your courses<small id="ebSec">No section yet</small></span>
+	  <span class="ec" id="ebCnt">0</span>
+	  <span class="flex1"></span>
+	  <button id="bEdit">Edit picks</button>
+	</div>
+	<div class="scrim" id="scrim"></div>
+
+	<footer>
+	  <span>Made by Pulkit with <span style="color:#E5484D">❤️</span></span>
+	</footer>
+
+<div class="mc-overlay" id="mcOverlay" aria-hidden="true">
+  <div class="mc-top">
+    <div class="mc-ttl"><span class="k">IIM Mumbai · Module 5</span><span class="t" id="mcTitle">My Class</span></div>
+    <span class="sp"></span>
+    <span class="mc-sync" id="mcSync" style="display:none"><i></i><span class="lbl">Synced</span></span>
+    <button class="mc-homebtn" id="mcHome" title="See your full timetable" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg><span class="lbl">Timetable</span></button>
+    <img class="mc-avatar" id="mcAvatar" alt="" style="display:none">
+    <button class="mc-xbtn" id="mcClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="mc-tabs" id="mcTabs" style="display:none">
+    <button class="mc-tab on" data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</button>
+    <button class="mc-tab" data-tab="tomorrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M12 14h4M14 12v4"/></svg>Tomorrow</button>
+    <button class="mc-tab" data-tab="attend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Attendance</button>
+    <button class="mc-tab" data-tab="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4"/></svg>Notes</button>
+    <button class="mc-tab" data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</button>
+  </div>
+  <div class="mc-body"><div class="mc-wrap" id="mcContent"></div></div>
+</div>
+
+
+<div class="cls-modal" id="clsModal" aria-hidden="true">
+  <div class="cls-card">
+    <div class="cls-head"><span class="cls-ttl" id="clsModalTtl">Class</span>
+      <button class="cls-x" id="clsModalX" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="cls-meta" id="clsModalMeta"></div>
+    <textarea id="clsModalNote" placeholder="Add a note or reminder for this class… it'll show up on the day this class is next on."></textarea>
+    <div class="cls-foot" id="clsModalFoot"><span class="cls-saved" id="clsModalSaved">Saved to your account &middot; shown on class day</span>
+      <button class="cls-save" id="clsModalSave">Save</button></div>
+    <div class="cls-login" id="clsModalGate" style="display:none">Log in from <b>My Class</b> first to add notes &amp; reminders. <button class="mc-linkbtn" id="clsModalLogin">Log in</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="capStage" aria-hidden="true"></div>
+
+<script>
+const COURSES = [{"id": 0, "slot": 1, "course": "Data Analytics and Knowledge Management", "section": null, "sessions": [{"day": "Monday", "start": "09:30", "end": "11:00", "room": "206", "faculty": "Prof. Hema Date", "slotLabel": "S 1-A"}, {"day": "Tuesday", "start": "11:10", "end": "12:40", "room": "206", "faculty": "Prof. Hema Date", "slotLabel": "S 1-B"}], "faculty": ["Prof. Hema Date"]}, {"id": 1, "slot": 1, "course": "Digital and Cyber Physical System", "section": null, "sessions": [{"day": "Monday", "start": "09:30", "end": "11:00", "room": "202", "faculty": "Dr. Mayank Mishra", "slotLabel": "S 1-A"}, {"day": "Tuesday", "start": "11:10", "end": "12:40", "room": "202", "faculty": "Dr. Mayank Mishra", "slotLabel": "S 1-B"}], "faculty": ["Dr. Mayank Mishra"]}, {"id": 2, "slot": 1, "course": "Enterprise Digital Transformation", "section": null, "sessions": [{"day": "Monday", "start": "09:30", "end": "11:00", "room": "201", "faculty": "Prof. Krishnan Harishankar", "slotLabel": "S 1-A"}, {"day": "Tuesday", "start": "11:10", "end": "12:40", "room": "201", "faculty": "Prof. Krishnan Harishankar", "slotLabel": "S 1-B"}], "faculty": ["Prof. Krishnan Harishankar"]}, {"id": 3, "slot": 1, "course": "Intelligent Enterprise", "section": null, "sessions": [{"day": "Monday", "start": "09:30", "end": "11:00", "room": "204", "faculty": "Prof. Purnima Sangle", "slotLabel": "S 1-A"}, {"day": "Tuesday", "start": "11:10", "end": "12:40", "room": "204", "faculty": "Prof. Purnima Sangle", "slotLabel": "S 1-B"}], "faculty": ["Prof. Purnima Sangle"]}, {"id": 4, "slot": 1, "course": "Reinforcement Learning: Theory and Applications", "section": null, "sessions": [{"day": "Monday", "start": "09:30", "end": "11:00", "room": "305", "faculty": "Dr. Anuj Vohra", "slotLabel": "S 1-A"}, {"day": "Tuesday", "start": "11:10", "end": "12:40", "room": "305", "faculty": "Dr. Anuj Vohra", "slotLabel": "S 1-B"}], "faculty": ["Dr. Anuj Vohra"]}, {"id": 5, "slot": 2, "course": "ESG Frameworks and Standards", "section": null, "sessions": [{"day": "Monday", "start": "11:10", "end": "12:40", "room": "207", "faculty": "Prof. Hema Diwan", "slotLabel": "S 2-A"}, {"day": "Tuesday", "start": "09:30", "end": "11:00", "room": "207", "faculty": "Prof. Hema Diwan", "slotLabel": "S 2-B"}], "faculty": ["Prof. Hema Diwan"]}, {"id": 6, "slot": 2, "course": "Energy efficiency, net Zero and Climate Change Management", "section": null, "sessions": [{"day": "Monday", "start": "11:10", "end": "12:40", "room": "305", "faculty": "Prof. Seema U.", "slotLabel": "S 2-A"}, {"day": "Tuesday", "start": "09:30", "end": "11:00", "room": "305", "faculty": "Prof. Seema U.", "slotLabel": "S 2-B"}], "faculty": ["Prof. Seema U."]}, {"id": 7, "slot": 2, "course": "Operational Excellence", "section": null, "sessions": [{"day": "Monday", "start": "11:10", "end": "12:40", "room": "204", "faculty": "Prof. Rahul Aggarwal", "slotLabel": "S 2-A"}, {"day": "Tuesday", "start": "09:30", "end": "11:00", "room": "204", "faculty": "Prof. Rahul Aggarwal", "slotLabel": "S 2-B"}], "faculty": ["Prof. Rahul Aggarwal"]}, {"id": 8, "slot": 2, "course": "Strategic Sourcing", "section": null, "sessions": [{"day": "Monday", "start": "11:10", "end": "12:40", "room": "201", "faculty": "Prof. V. B. Khanapuri", "slotLabel": "S 2-A"}, {"day": "Tuesday", "start": "09:30", "end": "11:00", "room": "201", "faculty": "Prof. V. B. Khanapuri", "slotLabel": "S 2-B"}], "faculty": ["Prof. V. B. Khanapuri"]}, {"id": 9, "slot": 2, "course": "Sustainable Supply chain Management", "section": null, "sessions": [{"day": "Monday", "start": "11:10", "end": "12:40", "room": "204", "faculty": "Prof. Seema U. and Prof. Vidyadhar Gedam", "slotLabel": "S 2-A"}, {"day": "Tuesday", "start": "09:30", "end": "11:00", "room": "204", "faculty": "Prof. Seema U. and Prof. Vidyadhar Gedam", "slotLabel": "S 2-B"}], "faculty": ["Prof. Seema U. and Prof. Vidyadhar Gedam"]}, {"id": 10, "slot": 3, "course": "Business Ethics", "section": "A", "sessions": [{"day": "Monday", "start": "14:30", "end": "16:00", "room": "202", "faculty": "Prof. D.K. Srivastava", "slotLabel": "S 3-A"}], "faculty": ["Prof. D.K. Srivastava"]}, {"id": 15, "slot": 3, "course": "Business Ethics", "section": "B", "sessions": [{"day": "Tuesday", "start": "14:30", "end": "16:00", "room": "202", "faculty": "Prof. D.K. Srivastava", "slotLabel": "S 3-B"}], "faculty": ["Prof. D.K. Srivastava"]}, {"id": 11, "slot": 3, "course": "Business Ethics", "section": "C", "sessions": [{"day": "Monday", "start": "14:30", "end": "16:00", "room": "201", "faculty": "Prof. Ranjan K. Mohapatra", "slotLabel": "S 3-A"}], "faculty": ["Prof. Ranjan K. Mohapatra"]}, {"id": 16, "slot": 3, "course": "Business Ethics", "section": "D", "sessions": [{"day": "Tuesday", "start": "14:30", "end": "16:00", "room": "204", "faculty": "Prof. Ranjan K. Mohapatra", "slotLabel": "S 3-B"}], "faculty": ["Prof. Ranjan K. Mohapatra"]}, {"id": 12, "slot": 3, "course": "Business Ethics", "section": "E", "sessions": [{"day": "Monday", "start": "14:30", "end": "16:00", "room": "206", "faculty": "Prof. Bhavya Kapoor", "slotLabel": "S 3-A"}], "faculty": ["Prof. Bhavya Kapoor"]}, {"id": 13, "slot": 3, "course": "Business Ethics", "section": "F", "sessions": [{"day": "Monday", "start": "14:30", "end": "16:00", "room": "207", "faculty": "Prof. Nikhil K. Mehta", "slotLabel": "S 3-A"}], "faculty": ["Prof. Nikhil K. Mehta"]}, {"id": 14, "slot": 3, "course": "Business Ethics", "section": "G", "sessions": [{"day": "Monday", "start": "14:30", "end": "16:00", "room": "204", "faculty": "Prof. Sukrit Dutt", "slotLabel": "S 3-A"}], "faculty": ["Prof. Sukrit Dutt"]}, {"id": 17, "slot": 3, "course": "Business Ethics", "section": "H", "sessions": [{"day": "Tuesday", "start": "14:30", "end": "16:00", "room": "203", "faculty": "Prof. Nikhil K. Mehta", "slotLabel": "S 3-B"}], "faculty": ["Prof. Nikhil K. Mehta"]}, {"id": 18, "slot": 3, "course": "Business Ethics", "section": "I", "sessions": [{"day": "Tuesday", "start": "14:30", "end": "16:00", "room": "201", "faculty": "Prof. Nishant Uppal", "slotLabel": "S 3-B"}], "faculty": ["Prof. Nishant Uppal"]}, {"id": 19, "slot": 4, "course": "Advanced SCM with Artificial Intelligence", "section": null, "sessions": [{"day": "Monday", "start": "16:10", "end": "17:40", "room": "201", "faculty": "Mr. Amit Kawoor", "slotLabel": "S 4-A"}, {"day": "Tuesday", "start": "16:10", "end": "17:40", "room": "201", "faculty": "Mr. Sidharth Joshi", "slotLabel": "S 4-B"}], "faculty": ["Mr. Amit Kawoor", "Mr. Sidharth Joshi"]}, {"id": 20, "slot": 4, "course": "Building and Leading Teams in Entrepreneurial Ventures", "section": null, "sessions": [{"day": "Monday", "start": "16:10", "end": "17:40", "room": "204", "faculty": "Mr. Ankur Jain", "slotLabel": "S 4-A"}, {"day": "Tuesday", "start": "16:10", "end": "17:40", "room": "204", "faculty": "Mr. Ankur Jain", "slotLabel": "S 4-B"}], "faculty": ["Mr. Ankur Jain"]}, {"id": 21, "slot": 4, "course": "Business Consulting and Innovation", "section": null, "sessions": [{"day": "Monday", "start": "16:10", "end": "17:40", "room": "208", "faculty": "Prof. Rahul Aggarwal", "slotLabel": "S 4-A"}, {"day": "Tuesday", "start": "16:10", "end": "17:40", "room": "208", "faculty": "Prof. Rahul Aggarwal", "slotLabel": "S 4-B"}], "faculty": ["Prof. Rahul Aggarwal"]}, {"id": 22, "slot": 4, "course": "Competency Assessment And Development", "section": null, "sessions": [{"day": "Monday", "start": "16:10", "end": "17:40", "room": "202", "faculty": "Prof. D.K. Srivastava", "slotLabel": "S 4-A"}, {"day": "Tuesday", "start": "16:10", "end": "17:40", "room": "202", "faculty": "Prof. D.K. Srivastava", "slotLabel": "S 4-B"}], "faculty": ["Prof. D.K. Srivastava"]}, {"id": 23, "slot": 4, "course": "Merger & Acquisition", "section": null, "sessions": [{"day": "Monday", "start": "16:10", "end": "17:40", "room": "207", "faculty": "Atul Bhat", "slotLabel": "S 4-A"}, {"day": "Tuesday", "start": "16:10", "end": "17:40", "room": "207", "faculty": "Atul Bhat", "slotLabel": "S 4-B"}], "faculty": ["Atul Bhat"]}, {"id": 66, "slot": 5, "course": "Leadership Development", "section": "E", "sessions": [{"day": "Wednesday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "202", "faculty": "Prof. Upasna Agarwal"}, {"day": "Thursday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "206", "faculty": "Prof. Upasna Agarwal"}], "faculty": ["Prof. Upasna Agarwal"]}, {"id": 67, "slot": 5, "course": "Sustainable Development for Business", "section": "F", "sessions": [{"day": "Wednesday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "203", "faculty": "Prof. Anju Singh"}, {"day": "Thursday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "202", "faculty": "Prof. Anju Singh"}], "faculty": ["Prof. Anju Singh"]}, {"id": 68, "slot": 5, "course": "Environmental Impact Assessment", "section": "I", "sessions": [{"day": "Wednesday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "206", "faculty": "Prof. Hema Diwan / Prof. Vidyadhar Gedam"}, {"day": "Thursday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "207", "faculty": "Prof. Hema Diwan / Prof. Vidyadhar Gedam"}], "faculty": ["Prof. Hema Diwan / Prof. Vidyadhar Gedam"]}, {"id": 69, "slot": 6, "course": "Strategic Management", "section": "E", "sessions": [{"day": "Wednesday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "201", "faculty": "GF / Industry"}, {"day": "Thursday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "201", "faculty": "GF / Industry"}], "faculty": ["GF / Industry"]}, {"id": 70, "slot": 6, "course": "Sustainable Development for Business", "section": "H", "sessions": [{"day": "Wednesday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "203", "faculty": "Prof. Anju Singh"}, {"day": "Thursday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "203", "faculty": "Prof. Anju Singh"}], "faculty": ["Prof. Anju Singh"]}, {"id": 71, "slot": 6, "course": "Sustainable Strategic Management", "section": "I", "sessions": [{"day": "Wednesday", "start": "11:10", "end": "12:40", "e": "12:40", "room": "207", "faculty": "Prof. Shirish Sangle"}, {"day": "Thursday", "start": "09:30", "end": "11:00", "e": "11:00", "room": "206", "faculty": "Prof. Shirish Sangle"}], "faculty": ["Prof. Shirish Sangle"]}, {"id": 72, "slot": 7, "course": "Leadership Development", "section": "A", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "202", "faculty": "Prof. Sumi Jha"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "202", "faculty": "Prof. Sumi Jha"}], "faculty": ["Prof. Sumi Jha"]}, {"id": 73, "slot": 7, "course": "Leadership Development", "section": "B", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "203", "faculty": "Prof. Poonam Singh"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "203", "faculty": "Prof. Poonam Singh"}], "faculty": ["Prof. Poonam Singh"]}, {"id": 74, "slot": 7, "course": "Leadership Development", "section": "C", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "206", "faculty": "Prof. Bhavya Kapoor"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "206", "faculty": "Prof. Bhavya Kapoor"}], "faculty": ["Prof. Bhavya Kapoor"]}, {"id": 75, "slot": 7, "course": "Leadership Development", "section": "D", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "207", "faculty": "Prof. Utpal Chattopadhyay"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "207", "faculty": "Prof. Utpal Chattopadhyay"}], "faculty": ["Prof. Utpal Chattopadhyay"]}, {"id": 76, "slot": 7, "course": "Operations Strategy", "section": "G", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "208", "faculty": "Prof. Milind M. Akarte"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "208", "faculty": "Prof. Milind M. Akarte"}], "faculty": ["Prof. Milind M. Akarte"]}, {"id": 77, "slot": 7, "course": "Operations Strategy", "section": "H", "sessions": [{"day": "Wednesday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "201", "faculty": "Prof. Balkrishna Eknath Narkhade"}, {"day": "Thursday", "start": "14:30", "end": "16:00", "e": "16:00", "room": "201", "faculty": "Prof. Balkrishna Eknath Narkhade"}], "faculty": ["Prof. Balkrishna Eknath Narkhade"]}, {"id": 78, "slot": 8, "course": "Strategic Management", "section": "A", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "204", "faculty": "Prof. Binilkumar A. Sreeraman"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "204", "faculty": "Prof. Binilkumar A. Sreeraman"}], "faculty": ["Prof. Binilkumar A. Sreeraman"]}, {"id": 79, "slot": 8, "course": "Strategic Management", "section": "B", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "206", "faculty": "Prof. Amitabha Sengupta"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "206", "faculty": "Prof. Amitabha Sengupta"}], "faculty": ["Prof. Amitabha Sengupta"]}, {"id": 80, "slot": 8, "course": "Strategic Management", "section": "C", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "203", "faculty": "Prof. Mainak Mazumdar"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "203", "faculty": "Prof. Mainak Mazumdar"}], "faculty": ["Prof. Mainak Mazumdar"]}, {"id": 81, "slot": 8, "course": "Strategic Management", "section": "D", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "202", "faculty": "Prof. Sumi Jha"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "202", "faculty": "Prof. Sumi Jha"}], "faculty": ["Prof. Sumi Jha"]}, {"id": 82, "slot": 8, "course": "Operations Strategy", "section": "F", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "208", "faculty": "Prof. Milind M. Akarte"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "208", "faculty": "Prof. Milind M. Akarte"}], "faculty": ["Prof. Milind M. Akarte"]}, {"id": 83, "slot": 8, "course": "Sustainable Development for Business", "section": "G", "sessions": [{"day": "Wednesday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "201", "faculty": "Prof. Hema Diwan"}, {"day": "Thursday", "start": "16:10", "end": "17:40", "e": "17:40", "room": "201", "faculty": "Prof. Hema Diwan"}], "faculty": ["Prof. Hema Diwan"]}, {"id": 54, "slot": 9, "course": "Business Dynamics and System Simulation", "section": null, "sessions": [{"day": "Friday", "start": "09:30", "end": "11:00", "room": "208", "faculty": "Prof. Padmanav Acharya", "slotLabel": "S 9-A"}, {"day": "Friday", "start": "11:10", "end": "12:40", "room": "208", "faculty": "Prof. Padmanav Acharya", "slotLabel": "S 9-B"}], "faculty": ["Prof. Padmanav Acharya"]}, {"id": 55, "slot": 9, "course": "Interconnected Logistics", "section": null, "sessions": [{"day": "Friday", "start": "09:30", "end": "11:00", "room": "207", "faculty": "Prof. Vijaya Kumar Manupati", "slotLabel": "S 9-A"}, {"day": "Friday", "start": "11:10", "end": "12:40", "room": "207", "faculty": "Prof. Vijaya Kumar Manupati", "slotLabel": "S 9-B"}], "faculty": ["Prof. Vijaya Kumar Manupati"]}, {"id": 56, "slot": 9, "course": "Next-Gen Facility Planning: Analytics, AI, and Automation", "section": null, "sessions": [{"day": "Friday", "start": "09:30", "end": "11:00", "room": "202", "faculty": "Prof. Priyanka Verma", "slotLabel": "S 9-A"}, {"day": "Friday", "start": "11:10", "end": "12:40", "room": "202", "faculty": "Prof. Priyanka Verma", "slotLabel": "S 9-B"}], "faculty": ["Prof. Priyanka Verma"]}, {"id": 57, "slot": 9, "course": "Prescriptive Analytics: Operations & Supply Chain Networks", "section": null, "sessions": [{"day": "Friday", "start": "09:30", "end": "11:00", "room": "203", "faculty": "Prof. L. Ganapathy", "slotLabel": "S 9-A"}, {"day": "Friday", "start": "11:10", "end": "12:40", "room": "203", "faculty": "Prof. L. Ganapathy", "slotLabel": "S 9-B"}], "faculty": ["Prof. L. Ganapathy"]}, {"id": 58, "slot": 9, "course": "Smart Service Systems: Operations for the Digital Age", "section": null, "sessions": [{"day": "Friday", "start": "09:30", "end": "11:00", "room": "206", "faculty": "Prof. Rofin T. M.", "slotLabel": "S 9-A"}, {"day": "Friday", "start": "11:10", "end": "12:40", "room": "206", "faculty": "Prof. Rofin T. M.", "slotLabel": "S 9-B"}], "faculty": ["Prof. Rofin T. M."]}, {"id": 59, "slot": 10, "course": "AI-Powered Financial Decision Architecture", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "201", "faculty": "Prof. Babita Agarwal", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "201", "faculty": "Prof. Babita Agarwal", "slotLabel": "S 10-B"}], "faculty": ["Prof. Babita Agarwal"]}, {"id": 60, "slot": 10, "course": "Investment Strategies And Portfolio Management", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "202", "faculty": "Prof. Ajaya Kumar Panda", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "202", "faculty": "Prof. Ajaya Kumar Panda", "slotLabel": "S 10-B"}], "faculty": ["Prof. Ajaya Kumar Panda"]}, {"id": 61, "slot": 10, "course": "Private Equity and Venture Finance", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "208", "faculty": "Prof. Ramesh Bhat", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "208", "faculty": "Prof. Ramesh Bhat", "slotLabel": "S 10-B"}], "faculty": ["Prof. Ramesh Bhat"]}, {"id": 62, "slot": 10, "course": "Square Foot Economics", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "305", "faculty": "Mr. Pallav Agarwal", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "305", "faculty": "Mr. Pallav Agarwal", "slotLabel": "S 10-B"}], "faculty": ["Mr. Pallav Agarwal"]}, {"id": 63, "slot": 10, "course": "Strategic Cost Management", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "207", "faculty": "Prof. Ranjani K. S.", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "207", "faculty": "Prof. Ranjani K. S.", "slotLabel": "S 10-B"}], "faculty": ["Prof. Ranjani K. S."]}, {"id": 64, "slot": 10, "course": "Supply Chain Finance", "section": null, "sessions": [{"day": "Friday", "start": "14:30", "end": "16:00", "room": "206", "faculty": "Prof. M. Venkateshwarlu", "slotLabel": "S 10-A"}, {"day": "Friday", "start": "16:10", "end": "17:40", "room": "206", "faculty": "Prof. M. Venkateshwarlu", "slotLabel": "S 10-B"}], "faculty": ["Prof. M. Venkateshwarlu"]}, {"id": 65, "slot": 13, "course": "Product Management", "section": null, "sessions": [{"day": "Monday", "start": "18:20", "end": "19:50", "room": "305", "faculty": "Prof. Neeraj Pandey", "slotLabel": "S 13-A"}, {"day": "Monday", "start": "20:00", "end": "21:30", "room": "305", "faculty": "Prof. Neeraj Pandey", "slotLabel": "S 13-B"}], "faculty": ["Prof. Neeraj Pandey"]}];
+const SECTIONS = {"A": [10, 72, 78], "B": [15, 73, 79], "C": [11, 74, 80], "D": [16, 75, 81], "E": [12, 66, 69], "F": [13, 67, 82], "G": [14, 76, 83], "H": [17, 70, 77], "I": [18, 68, 71]};
+
+const PAL = {
+  1:'#4F46E5',2:'#0F9D78',3:'#6B5BD2',4:'#D97706',5:'#0EA5E9',6:'#7C3AED',7:'#6B5BD2',
+  8:'#6B5BD2',9:'#0D9488',10:'#9333EA',11:'#0891B2',12:'#B45309',13:'#BE185D'
+};
+const acOf=s=>PAL[s]||'#2E54F0';
+function hexa(hex,a){const h=hex.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return`rgba(${r},${g},${b},${a})`;}
+
+const BANDS=[{s:'09:30',e:'11:00'},{s:'11:10',e:'12:40'},{lunch:1,s:'12:50',e:'14:20'},
+  {s:'14:30',e:'16:00'},{s:'16:10',e:'17:40'},{s:'18:20',e:'19:50'},{s:'20:00',e:'21:30'}];
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const DS={Monday:'Mon',Tuesday:'Tue',Wednesday:'Wed',Thursday:'Thu',Friday:'Fri',Saturday:'Sat'};
+
+let DATA=COURSES.slice();
+DATA.forEach(c=>c.sessions.forEach(s=>{s.e=s.e||s.end||'';}));
+let customFile=false;    // true once a user uploads a different module's file (SECTIONS no longer applies)
+const selected=new Set();    // every chosen course (compulsory + electives all live here, all removable)
+const required=new Set();    // ids that are compulsory for the active section (for labelling only)
+let activeSection=null;
+const byId=id=>DATA.find(c=>c.id===id);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const tm=t=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m;};
+const isReq=id=>required.has(id);
+function analyticsContext(extra){
+  const ids=[...selected];
+  return Object.assign({
+    active_section:activeSection||'none',
+    selected_count:ids.length,
+    required_count:ids.filter(isReq).length,
+    clash_count:clashCount(ids),
+    custom_file:customFile?'yes':'no'
+  },extra||{});
+}
+
+/* slots used by compulsory bundles, for the "compulsory" grouping header */
+const REQ_SLOTS=new Set();
+Object.values(SECTIONS).forEach(ids=>ids.forEach(id=>{const c=byId(id);if(c)REQ_SLOTS.add(c.slot);}));
+
+/* ---------- hash: section letter + selected ids ---------- */
+function readHash(){
+  const h=location.hash.replace(/^#/,'');if(!h)return;
+  let sec=null;const ids=[];
+  h.split(',').forEach(x=>{
+    x=x.trim();if(!x)return;
+    if(/^[A-Za-z]$/.test(x)){const s=x.toUpperCase();if(SECTIONS[s])sec=s;}
+    else{const n=+x;if(!isNaN(n))ids.push(n);}
+  });
+  if(sec)applySection(sec,true);
+  ids.forEach(n=>selected.add(n));
+}
+function writeHash(){
+  const parts=[];
+  if(activeSection)parts.push(activeSection);
+  [...selected].sort((a,b)=>a-b).forEach(n=>parts.push(n));
+  history.replaceState(null,'',parts.length?'#'+parts.join(','):location.pathname);
+}
+
+/* ---------- section selection: auto-ADD compulsory (still removable) ---------- */
+function applySection(sec,silent){
+  // remove previous section's required courses that are still selected & untouched
+  [...required].forEach(id=>selected.delete(id));
+  required.clear();
+  activeSection=sec;
+  (SECTIONS[sec]||[]).forEach(id=>{required.add(id);selected.add(id);});
+  if(!silent){writeHash();renderAll();
+    const n=(SECTIONS[sec]||[]).length;
+    toast('Section '+sec+' — '+n+' compulsory course'+(n>1?'s':'')+' added');}
+}
+function pickSection(sec){
+  if(activeSection===sec){return;}
+  applySection(sec);
+}
+function clearSection(){
+  [...required].forEach(id=>selected.delete(id));
+  required.clear();activeSection=null;writeHash();renderAll();toast('Section cleared');
+}
+
+function renderSecPills(){
+  const secbar=document.querySelector('.secbar');
+  if(customFile){ if(secbar)secbar.style.display='none'; return; }
+  if(secbar)secbar.style.display='';
+  const host=document.getElementById('secpills');host.innerHTML='';
+  Object.keys(SECTIONS).sort().forEach(sec=>{
+    const b=document.createElement('button');
+    b.className='secpill'+(activeSection===sec?' on':'');
+    b.textContent=sec;b.onclick=()=>pickSection(sec);
+    host.appendChild(b);
+  });
+  const clr=document.createElement('button');
+  clr.className='secpill clear';clr.textContent='Clear';clr.onclick=clearSection;
+  clr.style.display=activeSection?'flex':'none';
+  host.appendChild(clr);
+
+  const note=document.getElementById('secnote');
+  if(activeSection){
+    const n=(SECTIONS[activeSection]||[]).length;
+    note.innerHTML=`Section <b>${activeSection}</b> · <b>${n}</b> compulsory course${n>1?'s':''} added. Add electives below — remove anything you don't want.`;
+  }else{
+    note.textContent='Pick your section — your 3 compulsory courses get added automatically (you can still remove any).';
+  }
+  document.getElementById('ebSec').textContent=activeSection?('Section '+activeSection):'No section yet';
+}
+
+/* ---------- clash helpers ---------- */
+function clashSet(ids){const m={},bad=new Set();ids.forEach(id=>{const c=byId(id);if(!c)return;c.sessions.forEach(s=>{const k=s.day+'|'+s.start;(m[k]=m[k]||[]).push(id);});});Object.values(m).forEach(g=>{if(g.length>1)g.forEach(i=>bad.add(i));});return bad;}
+function clashCount(ids){const m={};let n=0;ids.forEach(id=>{const c=byId(id);if(!c)return;c.sessions.forEach(s=>{const k=s.day+'|'+s.start;(m[k]=m[k]||0);m[k]++;});});Object.values(m).forEach(v=>{if(v>1)n++;});return n;}
+
+/* ---------- course list ---------- */
+function renderList(){
+  const q=(document.getElementById('q').value||'').toLowerCase().trim();
+  const host=document.getElementById('list');host.innerHTML='';
+  const bad=clashSet([...selected]);
+
+  // For compulsory slots, only show the courses for the active section (avoids 9 near-identical rows).
+  const bySlot={};let shown=0;
+  DATA.forEach(c=>{
+    if(!customFile && REQ_SLOTS.has(c.slot)){
+      // only show this section's compulsory pick (if a section is chosen); otherwise show all sections so user can self-pick
+      if(activeSection && !required.has(c.id))return;
+    }
+    const hay=(c.course+' '+c.faculty.join(' ')+' '+c.sessions.map(s=>s.room).join(' ')+' '+(c.section||'')).toLowerCase();
+    if(q&&!hay.includes(q))return;(bySlot[c.slot]=bySlot[c.slot]||[]).push(c);shown++;
+  });
+  document.getElementById('elCnt').textContent=shown+' option'+(shown===1?'':'s');
+  const slots=Object.keys(bySlot).map(Number).sort((a,b)=>a-b);
+  if(!slots.length){host.innerHTML='<div class="nomatch">No course matches that search.</div>';return;}
+  slots.forEach(sl=>{
+    const ac=acOf(sl),sample=bySlot[sl][0];
+    const picked=bySlot[sl].some(c=>selected.has(c.id));
+    const reqSlot=!customFile && REQ_SLOTS.has(sl);
+    const g=document.createElement('div');g.className='sgroup';
+    g.innerHTML=`<div class="sh${picked?' has':''}${reqSlot?' req':''}"><span class="sp" style="background:${ac}">SLOT ${sl}</span>
+      <span class="sm">${sample.sessions.map(s=>DS[s.day]+' '+s.start).join(' · ')}</span>
+      <span class="pick">${reqSlot?'compulsory':'pick one'}</span><span class="sl"></span></div>`;
+    bySlot[sl].forEach(c=>{
+      const on=selected.has(c.id),bd=bad.has(c.id),rq=isReq(c.id);
+      const el=document.createElement('div');
+      el.className='crd'+(on?' on':'')+(bd?' bad':'');
+      el.style.setProperty('--cd',ac);el.style.setProperty('--cb',hexa(ac,.07));
+      el.innerHTML=`<div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 6"/></svg></div>
+        <div class="ti">${esc(c.course)}${rq?'<span class="reqtag">Compulsory</span>':''}</div>
+        <div class="mid"><span class="pf">${esc(c.faculty.join(' · '))}</span>${c.section?`<span class="se">SEC ${esc(c.section)}</span>`:''}</div>
+        <div class="ss">${c.sessions.map(s=>`<span class="pl">${DS[s.day]} ${s.start} · <em>${esc(s.room||'—')}</em></span>`).join('')}</div>
+        <div class="bad-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>Overlaps another pick — remove one</div>`;
+      el.onclick=()=>toggle(c.id);
+      g.appendChild(el);
+    });
+    host.appendChild(g);
+  });
+}
+function toggle(id){selected.has(id)?selected.delete(id):selected.add(id);writeHash();renderAll();}
+
+/* ---------- desktop grid ---------- */
+const bandIdx=start=>BANDS.findIndex(b=>b.s===start);
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  const picks=[...selected].map(byId).filter(Boolean);
+  const cl=clashCount([...selected]);
+  const sub=document.getElementById('wkSub'),legend=document.getElementById('legend');
+  const rc=[...selected].filter(isReq).length;
+  if(!picks.length){sub.textContent='nothing picked yet';sub.className='sub';legend.style.display='none';}
+  else if(cl){sub.textContent=`${picks.length} course${picks.length>1?'s':''}${rc?' · '+rc+' compulsory':''} · ${cl} clash${cl>1?'es':''}`;sub.className='sub alert';legend.style.display='flex';}
+  else{sub.textContent=`${picks.length} course${picks.length>1?'s':''}${rc?' · '+rc+' compulsory':''} · no clashes`;sub.className='sub';legend.style.display=rc?'flex':'none';}
+
+  let h='<div class="gcell corner"></div>';
+  const dayCount={};DAYS.forEach(d=>dayCount[d]=0);
+  picks.forEach(c=>c.sessions.forEach(s=>{if(dayCount[s.day]!=null&&bandIdx(s.start)>=0)dayCount[s.day]++;}));
+  DAYS.forEach(d=>{h+=`<div class="gcell col-head"><div class="d">${d}</div><div class="n">${dayCount[d]||'—'} ${dayCount[d]===1?'class':'classes'}</div></div>`;});
+
+  if(!picks.length){
+    h+=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      <h3>Your week is empty</h3><p>Pick your section at the top to auto-add compulsory courses, then add electives from the left.</p></div>`;
+    grid.innerHTML=h;return;
+  }
+  const cells={};DAYS.forEach(d=>cells[d]=BANDS.map(()=>[]));
+  picks.forEach(c=>c.sessions.forEach(s=>{const bi=bandIdx(s.start);if(DAYS.includes(s.day)&&bi>=0)cells[s.day][bi].push({c,s});}));
+
+  BANDS.forEach((b,bi)=>{
+    if(b.lunch){h+=`<div class="lunch"><span class="t">Lunch</span><span class="ln"></span><span class="t mono" style="letter-spacing:0">${b.s}–${b.e}</span></div>`;return;}
+    h+=`<div class="gcell time-col"><div class="a">${b.s}</div><div class="b">${b.e}</div></div>`;
+    DAYS.forEach(d=>{
+      const items=cells[d][bi],clash=items.length>1;
+      h+=`<div class="gcell slotcell${clash?' clash':''}">`;
+      if(clash)h+=`<div class="clashlabel">⚠ ${items.length} OVERLAP</div>`;
+      items.forEach(({c,s})=>{
+        const ac=acOf(c.slot),rq=isReq(c.id);
+        h+=`<div class="blk" data-cid="${c.id}" title="Add a note or reminder" style="cursor:pointer;--ac:${ac};--bg2:${hexa(ac,.07)};--bd:${hexa(ac,.26)}">
+          <div class="nm">${esc(c.course)}</div>
+          <div class="row">
+            <span class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(s.room||'—')}</span>
+            <span class="prof">${esc(s.faculty.split(' / ')[0].split(' and ')[0])}</span>
+          </div>
+          <div class="tag">${rq?'<em>Compulsory</em> · ':''}${c.section?'Sec '+esc(c.section)+' · ':''}Slot ${c.slot}</div>
+        </div>`;
+      });
+      h+=`</div>`;
+    });
+  });
+  grid.innerHTML=h;
+  renderMobileWeek(picks);
+}
+
+/* ---------- mobile agenda ---------- */
+function renderMobileWeek(picks){
+  const host=document.getElementById('mweek');if(!host)return;
+  if(!picks.length){
+    host.innerHTML=`<div class="mempty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      <h3>Your week is empty</h3><p>Pick your section, then tap “Edit picks” to add electives.</p></div>`;return;
+  }
+  let h='';
+  DAYS.forEach(d=>{
+    const rows=[];
+    BANDS.forEach((b)=>{
+      if(b.lunch)return;
+      const items=picks.filter(c=>c.sessions.some(s=>s.day===d&&s.start===b.s))
+        .map(c=>({c,s:c.sessions.find(s=>s.day===d&&s.start===b.s)}));
+      if(items.length)rows.push({b,items});
+    });
+    const cnt=rows.reduce((a,r)=>a+r.items.length,0);
+    h+=`<div class="mday"><div class="mday-h"><span class="dd">${d}</span><span class="dn">${cnt} ${cnt===1?'class':'classes'}</span><span class="dl"></span></div>`;
+    if(!rows.length){h+=`<div class="mday-free">No classes — free day.</div>`;}
+    rows.forEach(({b,items})=>{
+      const clash=items.length>1;
+      h+=`<div class="mrow"><div class="mt"><div class="a">${b.s}</div><div class="b">${b.e}</div></div><div class="mc">`;
+      if(clash)h+=`<div class="mclash">⚠ ${items.length} OVERLAPPING</div>`;
+      items.forEach(({c,s})=>{
+        const ac=acOf(c.slot),rq=isReq(c.id);
+        h+=`<div class="mblk${clash?' clash':''}" data-cid="${c.id}" title="Add a note or reminder" style="cursor:pointer;--ac:${ac};--bg2:${hexa(ac,.07)};--bd:${hexa(ac,.26)}">
+          <div class="nm">${esc(c.course)}</div>
+          <div class="mmeta">
+            <span class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(s.room||'—')}</span>
+            <span class="prof">${esc(s.faculty.split(' / ')[0].split(' and ')[0])}</span>
+          </div>
+          <div class="tag">${rq?'<span class="reqpill">Compulsory</span> ':''}${c.section?'Sec '+esc(c.section)+' · ':''}Slot ${c.slot}</div>
+        </div>`;
+      });
+      h+=`</div></div>`;
+    });
+    h+=`</div>`;
+  });
+  host.innerHTML=h;
+}
+
+function renderStats(){
+  const ids=[...selected],picks=ids.map(byId).filter(Boolean);
+  document.getElementById('stC').textContent=picks.length;
+  document.getElementById('ebCnt').textContent=picks.length;
+  let mins=0;picks.forEach(c=>c.sessions.forEach(s=>{const a=tm(s.start),b=tm(s.e);if(b>a)mins+=b-a;}));
+  document.getElementById('stH').textContent=mins?(mins/60).toFixed(mins%60?1:0):0;
+  const cl=clashCount(ids);
+  document.getElementById('stClash').textContent=cl;
+  document.getElementById('stClashWrap').classList.toggle('zero',cl===0);
+}
+	function renderAll(){
+	  renderSecPills();renderList();renderGrid();renderStats();
+	  if(typeof window.__afterPlannerRender==='function')window.__afterPlannerRender();
+	}
+
+function openPanel(){document.body.classList.add('open');setTimeout(()=>{try{document.getElementById('q').focus({preventScroll:true});}catch(e){}},260);}
+function closePanel(){document.body.classList.remove('open');}
+document.getElementById('bEdit').onclick=openPanel;
+document.getElementById('bClose').onclick=closePanel;
+document.getElementById('scrim').onclick=closePanel;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
+document.getElementById('q').addEventListener('input',renderList);
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2100);}
+document.getElementById('bLink').onclick=()=>{writeHash();navigator.clipboard?.writeText(location.href).then(()=>toast('Link copied — it remembers your section + picks'),()=>toast('Your picks are saved in the address bar'));};
+document.getElementById('bUp').onclick=()=>document.getElementById('file').click();
+document.getElementById('file').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{try{const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});const p=parseWorkbook(wb);
+    if(!p.length){toast('No courses found in that file');return;}DATA=p;customFile=true;selected.clear();required.clear();activeSection=null;writeHash();renderAll();toast('Loaded '+p.length+' courses');openPanel();}
+    catch(err){console.error(err);toast('Could not read that file');}};
+  r.readAsArrayBuffer(f);
+});
+/* ---------- download menu ---------- */
+const dlWrap=document.querySelector('.dl-wrap');
+const dlMenu=document.getElementById('dlMenu');
+function openDl(){dlWrap.classList.add('open');document.getElementById('bPng').setAttribute('aria-expanded','true');}
+function closeDl(){dlWrap.classList.remove('open');document.getElementById('bPng').setAttribute('aria-expanded','false');}
+document.getElementById('bPng').onclick=e=>{e.stopPropagation();
+  if(!selected.size){trackEvent('download_menu_blocked',analyticsContext({reason:'empty_week'}));toast('Pick your section or a course first');return;}
+  const willOpen=!dlWrap.classList.contains('open');
+  willOpen?openDl():closeDl();
+  trackEvent(willOpen?'download_menu_open':'download_menu_close',analyticsContext());
+};
+document.addEventListener('click',e=>{if(!dlWrap.contains(e.target))closeDl();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDl();});
+
+const headerHTML=(subtitle)=>{
+  const secTxt=activeSection?('Section '+activeSection+' · '):'';
+  const n=[...selected].length;
+  const cl=clashCount([...selected]);
+  return `<div class="cap-head"><div class="ck">IIM Mumbai · PGDM Module 5</div>
+    <div class="ct">My week</div>
+    <div class="cs">${secTxt}${n} course${n>1?'s':''}${cl?' · '+cl+' clash'+(cl>1?'es':''):' · no clashes'} · ${subtitle}</div></div>`;
+};
+const footHTML=`<div class="cap-foot">Made by Pulkit with ❤️</div>`;
+
+/* Build the FULL WEEK GRID as standalone markup (works on any device) */
+function buildFullCapture(){
+  const picks=[...selected].map(byId).filter(Boolean);
+  const cells={};DAYS.forEach(d=>cells[d]=BANDS.map(()=>[]));
+  picks.forEach(c=>c.sessions.forEach(s=>{const bi=bandIdx(s.start);if(DAYS.includes(s.day)&&bi>=0)cells[s.day][bi].push({c,s});}));
+  const dayCount={};DAYS.forEach(d=>dayCount[d]=0);
+  picks.forEach(c=>c.sessions.forEach(s=>{if(dayCount[s.day]!=null&&bandIdx(s.start)>=0)dayCount[s.day]++;}));
+
+  let g='<div class="gcell corner"></div>';
+  DAYS.forEach(d=>{g+=`<div class="gcell col-head"><div class="d">${d}</div><div class="n">${dayCount[d]||'—'} ${dayCount[d]===1?'class':'classes'}</div></div>`;});
+  BANDS.forEach((b,bi)=>{
+    if(b.lunch){g+=`<div class="lunch"><span class="t">Lunch</span><span class="ln"></span><span class="t mono" style="letter-spacing:0">${b.s}–${b.e}</span></div>`;return;}
+    g+=`<div class="gcell time-col"><div class="a">${b.s}</div><div class="b">${b.e}</div></div>`;
+    DAYS.forEach(d=>{
+      const items=cells[d][bi],clash=items.length>1;
+      g+=`<div class="gcell slotcell${clash?' clash':''}">`;
+      if(clash)g+=`<div class="clashlabel">⚠ ${items.length} OVERLAP</div>`;
+      items.forEach(({c,s})=>{const ac=acOf(c.slot),rq=isReq(c.id);
+        g+=`<div class="blk" style="--ac:${ac};--bg2:${hexa(ac,.07)};--bd:${hexa(ac,.26)}">
+          <div class="nm">${esc(c.course)}</div>
+          <div class="row"><span class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(s.room||'—')}</span>
+          <span class="prof">${esc(s.faculty.split(' / ')[0].split(' and ')[0])}</span></div>
+          <div class="tag">${rq?'<em>Compulsory</em> · ':''}${c.section?'Sec '+esc(c.section)+' · ':''}Slot ${c.slot}</div></div>`;
+      });
+      g+=`</div>`;
+    });
+  });
+  return `<div class="cap" style="width:1180px">${headerHTML('full week grid')}
+    <div class="cap-grid">${g}</div>${footHTML}</div>`;
+}
+
+/* Build the MOBILE day-by-day agenda as standalone markup (works on any device) */
+function buildMobileCapture(){
+  const picks=[...selected].map(byId).filter(Boolean);
+  let m='';
+  DAYS.forEach(d=>{
+    const rows=[];
+    BANDS.forEach((b)=>{if(b.lunch)return;
+      const items=picks.filter(c=>c.sessions.some(s=>s.day===d&&s.start===b.s))
+        .map(c=>({c,s:c.sessions.find(s=>s.day===d&&s.start===b.s)}));
+      if(items.length)rows.push({b,items});});
+    const cnt=rows.reduce((a,r)=>a+r.items.length,0);
+    m+=`<div class="mday"><div class="mday-h" style="position:static"><span class="dd">${d}</span><span class="dn">${cnt} ${cnt===1?'class':'classes'}</span><span class="dl"></span></div>`;
+    if(!rows.length){m+=`<div class="mday-free">No classes — free day.</div>`;}
+    rows.forEach(({b,items})=>{const clash=items.length>1;
+      m+=`<div class="mrow"><div class="mt"><div class="a">${b.s}</div><div class="b">${b.e}</div></div><div class="mc">`;
+      if(clash)m+=`<div class="mclash">⚠ ${items.length} OVERLAPPING</div>`;
+      items.forEach(({c,s})=>{const ac=acOf(c.slot),rq=isReq(c.id);
+        m+=`<div class="mblk${clash?' clash':''}" style="--ac:${ac};--bg2:${hexa(ac,.07)};--bd:${hexa(ac,.26)}">
+          <div class="nm">${esc(c.course)}</div>
+          <div class="mmeta"><span class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>${esc(s.room||'—')}</span>
+          <span class="prof">${esc(s.faculty.split(' / ')[0].split(' and ')[0])}</span></div>
+          <div class="tag">${rq?'<span class="reqpill">Compulsory</span> ':''}${c.section?'Sec '+esc(c.section)+' · ':''}Slot ${c.slot}</div></div>`;
+      });
+      m+=`</div></div>`;
+    });
+    m+=`</div>`;
+  });
+  return `<div class="cap" style="width:430px">${headerHTML('day by day')}
+    <div style="padding:14px 16px 4px">${m}</div>${footHTML}</div>`;
+}
+
+async function snap(html,filename,scale,downloadType){
+  closeDl();
+  const ctx=analyticsContext({download_type:downloadType,file_name:filename});
+  if(!selected.size){trackEvent('timetable_download_blocked',Object.assign({},ctx,{reason:'empty_week'}));toast('Pick your section or a course first');return;}
+  trackEvent('timetable_download_click',ctx);
+  if(typeof html2canvas==='undefined'){trackEvent('timetable_download_print_fallback',ctx);window.print();return;}
+  toast('Rendering image…');
+  const stage=document.getElementById('capStage');
+  stage.innerHTML=html;
+  const node=stage.firstElementChild;
+  try{
+    await new Promise(r=>setTimeout(r,60));
+    const cv=await html2canvas(node,{backgroundColor:'#ffffff',scale:scale||2,
+      width:node.offsetWidth,windowWidth:node.offsetWidth+40,useCORS:true});
+    const a=document.createElement('a');a.download=filename;a.href=cv.toDataURL('image/png');a.click();
+    trackEvent('timetable_download_success',ctx);
+    toast('Saved '+filename);
+  }catch(err){console.error(err);trackEvent('timetable_download_error',Object.assign({},ctx,{error_message:String(err&&err.message||err).slice(0,120)}));toast('Could not render — opening print instead');window.print();}
+  finally{stage.innerHTML='';}
+}
+const secSuffix=()=>activeSection?('-sec'+activeSection):'';
+document.getElementById('dlMobile').onclick=()=>snap(buildMobileCapture(),'my-week-mobile'+secSuffix()+'.png',2.5,'mobile');
+document.getElementById('dlFull').onclick=()=>snap(buildFullCapture(),'my-week-full'+secSuffix()+'.png',2,'full_week');
+
+function parseWorkbook(wb){
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const grid=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null});
+  const blocks=[[2,10],[11,19],[20,28],[29,37],[38,46],[47,55],[56,64],[65,73]];
+  const times=[['09:30','11:00'],['11:10','12:40'],['12:50','14:20'],['14:30','16:00'],['16:10','17:40'],['17:45','18:15'],['18:20','19:50'],['20:00','21:30']];
+  const dayRows=[[1,'Monday'],[6,'Tuesday'],[11,'Wednesday'],[16,'Thursday'],[21,'Friday'],[26,'Saturday']];
+  const clean=s=>s==null?'':String(s).replace(/\s+/g,' ').trim();
+  const at=(r,c)=>(grid[r]&&grid[r][c]!=null)?grid[r][c]:null;
+  const raw=[];
+  dayRows.forEach(([dr,dn])=>blocks.forEach(([s,e],bi)=>{
+    const slot=clean(at(dr,s));if(!slot)return;const low=slot.toLowerCase();
+    if(low.startsWith('surprise')||low.startsWith('lunch'))return;
+    const cstr=clean(at(dr+1,s));const fac=[];
+    for(let c=s;c<=e;c++){const f=at(dr+3,c);if(f!=null&&clean(f))fac.push([c,clean(at(dr+2,c)),clean(f),clean(at(dr+4,c))]);}
+    if(!fac.length)return;
+    const m=slot.match(/S\s*(\d+)/);const slotnum=m?+m[1]:0;
+    let parts=cstr.split('/').map(x=>x.trim()).filter(Boolean);
+    if(parts.length<=1)parts=cstr.split(',').map(x=>x.trim()).filter(Boolean);
+    const basket=parts.length>1&&parts.length===fac.length;const[st,en]=times[bi];
+    fac.forEach(([c,sec,f,room],i)=>raw.push({slot:slotnum,day:dn,start:st,end:en,course:basket?parts[i]:(cstr||slot),faculty:f,room:room||'',section:basket?null:(sec||null)}));
+  }));
+  const map=new Map();
+  raw.forEach(o=>{const k=o.slot+'|'+o.course+'|'+(o.section||'');if(!map.has(k))map.set(k,{slot:o.slot,course:o.course,section:o.section,faculty:[],sessions:[]});
+    const c=map.get(k);c.sessions.push({day:o.day,start:o.start,end:o.end,e:o.end,room:o.room,faculty:o.faculty});if(!c.faculty.includes(o.faculty))c.faculty.push(o.faculty);});
+  const out=[...map.values()].sort((a,b)=>a.slot-b.slot||a.course.localeCompare(b.course));
+  out.forEach((c,i)=>c.id=i);return out;
+}
+
+readHash();renderAll();
+if(!selected.size&&window.innerWidth>1000){try{document.getElementById('q').focus({preventScroll:true});}catch(e){}}
+</script>
+<script>
+
+/* ====================================================================
+   MY CLASS — Phase 1
+   login (email/pw, @iimmumbai.ac.in, verified) · today hub ·
+   attendance · notes · mess(hidden) · calendar export
+   Reads existing globals: DATA, selected, DAYS, BANDS, byId, acOf, esc, toast
+   ==================================================================== */
+(function(){
+'use strict';
+
+/* ---------- CONFIG: paste your Firebase project values here ---------- */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBYXeurUihchEYzAKMJdGitYI8CprwKjjk",
+  authDomain:        "iimm-eadab.firebaseapp.com",
+  projectId:         "iimm-eadab",
+  storageBucket:     "iimm-eadab.firebasestorage.app",
+  messagingSenderId: "439456001215",
+  appId:             "1:439456001215:web:933c118437817d356d6a0a"
+};
+		const ALLOWED_DOMAIN = "iimmumbai.ac.in";
+		const REQUIRE_COLLEGE_EMAIL = true;
+		const MESS_ENABLED   = false;   // flip to true once you have the menu data
+		const ATTEND_THRESHOLD = 85;    // the % safety line (must maintain 85%)
+		const REGULAR_CLASSES = 20;     // total sessions in a normal course
+		const MICRO_CLASSES   = 10;     // total sessions in a micro-credit course
+		const MICROCREDIT_COURSES = ['business ethics'];  // lowercase substrings → 10-class courses
+		const PLANNER_DRAFT_KEY = 'iimmodule5:lastPlanner';
+		const LAST_AUTH_EMAIL_KEY = 'iimmodule5:lastAuthEmail';
+		const ATT_KEY_BASE   = 'iimmodule5:attendance';
+		const NOTES_KEY_BASE = 'iimmodule5:notes';
+		/* ---- academic calendar (Module V, 2026): no classes on these ---- */
+		const MODULE_START = '2026-06-15';
+		const MODULE_END = '2026-08-29';
+		const NO_CLASS_RANGES = [
+		  {from:'2026-07-16', to:'2026-07-18', label:'Mid-Term Exam (Module V)'},
+		  {from:'2026-08-24', to:'2026-08-29', label:'End-Term Exam (Module V)'}
+		];
+		const HOLIDAYS = {
+		  '2026-01-14':'Makar Sankranti','2026-01-26':'Republic Day','2026-03-04':'Holi',
+		  '2026-03-21':"Idu'l Fitr",'2026-03-31':'Mahavir Jayanti','2026-04-03':'Good Friday',
+		  '2026-05-01':'Buddha Purnima','2026-05-27':"Idu'l Zuha (Bakrid)",'2026-06-26':'Muharram',
+		  '2026-08-15':'Independence Day','2026-08-26':'Milad-un-Nabi','2026-09-14':'Ganesh Chaturthi',
+		  '2026-10-02':'Gandhi Jayanti','2026-10-20':'Dussehra','2026-11-08':'Diwali',
+		  '2026-11-24':"Guru Nanak's Birthday",'2026-12-25':'Christmas'
+		};
+
+	/* ---------- tiny helpers ---------- */
+	const $ = id => document.getElementById(id);
+	const dayName = ()=>['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
+	const todayKey = ()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const prettyDate = ()=>new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+const WDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const dateFromKey = str=>{const p=String(str||'').split('-').map(Number);return new Date(p[0]||1970,(p[1]||1)-1,p[2]||1);};
+const prettyDateFor = str=>{try{return dateFromKey(str).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});}catch(e){return str;}};
+const dateKeyOf = d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+/* ---- course type / total classes ---- */
+function isMicrocredit(c){const n=((c&&c.course)||'').toLowerCase();return MICROCREDIT_COURSES.some(m=>n.includes(m));}
+function totalClassesFor(c){return isMicrocredit(c)?MICRO_CLASSES:REGULAR_CLASSES;}
+
+/* ---- academic-calendar checks ---- */
+function noClassReason(ds){ if(HOLIDAYS[ds])return HOLIDAYS[ds]; for(const r of NO_CLASS_RANGES){ if(ds>=r.from&&ds<=r.to)return r.label; } return ''; }
+function isNoClassDate(ds){ return !!noClassReason(ds); }
+function collectNoClassDates(){ const set=new Set(Object.keys(HOLIDAYS)); NO_CLASS_RANGES.forEach(r=>{ let d=dateFromKey(r.from), end=dateFromKey(r.to); while(d<=end){ set.add(dateKeyOf(d)); d.setDate(d.getDate()+1);} }); return set; }
+/* classes in the last N days that were held (not holiday/weekend) but never marked */
+function recentUnmarked(daysBack){
+  const out=[], now=new Date();
+  for(let i=1;i<=daysBack;i++){
+    const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);
+    const ds=dateKeyOf(d), wd=WDAYS[d.getDay()];
+    if(ds<MODULE_START||wd==='Saturday'||wd==='Sunday'||isNoClassDate(ds))continue;
+    sessionsOn(wd).forEach(({c,s})=>{ const key=ds+'|'+c.id+'|'+s.start; if(!attendance[key])out.push({ds,key}); });
+  }
+  return out;
+}
+
+/* ---- offline mirror (attendance + notes) keyed per user ---- */
+function attKey(){return ATT_KEY_BASE+(user?(':'+user.uid):'');}
+function notesKey(){return NOTES_KEY_BASE+(user?(':'+user.uid):'');}
+function saveAttendanceLocal(){try{localStorage.setItem(attKey(),JSON.stringify(attendance));}catch(e){}}
+function saveNotesLocal(){try{localStorage.setItem(notesKey(),JSON.stringify(notes));}catch(e){}}
+function hydrateLocalMirror(){
+  try{const a=JSON.parse(localStorage.getItem(attKey())||'null'); if(a&&typeof a==='object')attendance=a;}catch(e){}
+  try{const n=JSON.parse(localStorage.getItem(notesKey())||'null'); if(n&&typeof n==='object')notes=n;}catch(e){}
+}
+
+/* ---- "last synced" indicator ---- */
+let syncStatus='idle';
+function setSync(state){
+  syncStatus = state==='error' ? 'offline' : state;
+  const el=$('mcSync'); if(!el)return;
+  if(!user){el.style.display='none';return;}
+  el.style.display='inline-flex';
+  el.className='mc-sync '+syncStatus;
+  const labels={saving:'Saving…',saved:'Saved',offline:'Offline · saved on device',blocked:'Not synced — verify email',idle:'Synced'};
+  el.innerHTML='<i></i><span class="lbl">'+(labels[syncStatus]||labels.idle)+'</span>';
+  clearTimeout(setSync._t);
+  if(syncStatus==='saved')setSync._t=setTimeout(()=>setSync('idle'),2500);
+}
+const safe = s => esc(String(s==null?'':s));
+
+/* ---- analytics: send a Google Analytics event (namespaced) ---- */
+function mcTrack(name,params){ try{ if(typeof trackEvent==='function') trackEvent('mc_'+name, params||{}); }catch(e){} }
+
+/* ---- distinguish a rules rejection (verify / wrong domain) from a real network blip ---- */
+function isPermDenied(e){ return !!e && (e.code==='permission-denied' || /permission|insufficient/i.test(String(e&&e.message||''))); }
+let syncBlockedToastAt=0;
+function handleSyncError(e,quiet){
+  console.error('cloud save failed',e);
+  if(isPermDenied(e)){
+    setSync('blocked');
+    if(!quiet){
+      const now=Date.now();
+      if(now-syncBlockedToastAt>4000){
+        syncBlockedToastAt=now;
+        if(user && !user.emailVerified) toast('Not syncing — verify your email first (check your Junk / Spam folder)');
+        else toast('Not syncing — sign in with your verified @'+ALLOWED_DOMAIN+' email');
+      }
+    }
+  }else{
+    setSync('offline');
+    if(!quiet)toast('Saved on this device — will sync when back online');
+  }
+}
+/* pull a fresh ID token so the rules see the latest email_verified claim (else it stays stale until ~1h / re-login) */
+async function refreshAuth(){
+  if(!user)return;
+  try{ await user.reload(); }catch(e){}
+  try{ if(user && user.emailVerified) await user.getIdToken(true); }catch(e){}
+}
+
+/* ---------- Firebase state ---------- */
+	let fb=null, auth=null, db=null, user=null, profile=null;
+		let attendance={}, notes={};        // local mirrors of Firestore docs
+		let activeTab='today';
+		let backfillOpen=false, backfillDate='';   // "add past attendance" sub-view
+		let attendView='summary';   // 'summary' | 'sheet' (full dated register)
+		let configured = FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey!=='PASTE_API_KEY';
+		let plannerHydrated=false, suppressPlannerSync=false, plannerSyncTimer=null;
+		let gateLocked=false, pendingAuthFlow='';
+		let verificationNotice='';
+
+	function initFirebase(){
+	  if(!configured){return false;}
+	  try{
+	    fb=firebase.initializeApp(FIREBASE_CONFIG);
+	    auth=firebase.auth();
+	    db=firebase.firestore();
+	    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+	    auth.onAuthStateChanged(onAuthChange);
+	    return true;
+	  }catch(e){console.error('Firebase init failed',e);return false;}
+	}
+
+	/* ---------- the courses the user has picked (from existing planner) ---------- */
+	function myCourses(){return [...selected].map(byId).filter(Boolean);}
+	function plannerIds(){return [...selected].map(Number).filter(id=>byId(id)).sort((a,b)=>a-b);}
+	function plannerClashes(){return clashCount(plannerIds());}
+	function hasTimetable(){return plannerIds().length>0;}
+	function hasReadyTimetable(){return hasTimetable() && plannerClashes()===0;}
+	function plannerPayload(extra){
+	  const ids=plannerIds();
+	  return Object.assign({
+	    courseIds:ids,
+	    section:activeSection||null,
+	    customFile:!!customFile,
+	    clashCount:clashCount(ids),
+	    onboardingStep:ids.length && clashCount(ids)===0 ? 'ready' : 'timetable',
+	    updatedAt:Date.now()
+	  },extra||{});
+	}
+	function saveDraftLocal(payload){
+	  try{localStorage.setItem(PLANNER_DRAFT_KEY,JSON.stringify(payload||plannerPayload()));}catch(e){}
+	}
+	function applyPlannerFromData(data){
+	  if(!data)return false;
+	  const ids=Array.isArray(data.courseIds)?data.courseIds.map(Number).filter(id=>byId(id)):[];
+	  const sec=(data.section&&SECTIONS[data.section])?data.section:null;
+	  if(!ids.length&&!sec)return false;
+	  suppressPlannerSync=true;
+	  selected.clear(); required.clear(); activeSection=null;
+	  if(sec&&!customFile)applySection(sec,true);
+	  ids.forEach(id=>selected.add(id));
+	  writeHash();
+	  renderAll();
+	  suppressPlannerSync=false;
+	  return true;
+	}
+	async function savePlannerData(extra,quiet){
+	  const payload=plannerPayload(extra);
+	  saveDraftLocal(payload);
+	  if(!user||!db)return payload;
+	  setSync('saving');
+	  try{
+	    await db.collection('users').doc(user.uid).set(Object.assign({},payload,{
+	      email:user.email||'',
+	      emailVerified:!!user.emailVerified
+	    }),{merge:true});
+	    profile=Object.assign({},profile||{},payload);
+	    setSync('saved');
+	  }catch(e){
+	    handleSyncError(e,quiet);
+	  }
+	  updateAuthButton();
+	  renderSetupBanner();
+	  return payload;
+	}
+	function schedulePlannerSave(){
+	  if(suppressPlannerSync||!plannerHydrated)return;
+	  saveDraftLocal(plannerPayload());
+	  renderSetupBanner();
+	  if(!user||!db)return;
+	  clearTimeout(plannerSyncTimer);
+	  plannerSyncTimer=setTimeout(()=>savePlannerData({},true),650);
+	}
+
+	/* sessions happening on a given weekday, sorted by start time */
+	function sessionsOn(day){
+  const out=[];
+  myCourses().forEach(c=>c.sessions.forEach(s=>{if(s.day===day)out.push({c,s});}));
+  out.sort((a,b)=>a.s.start.localeCompare(b.s.start));
+  return out;
+}
+
+/* ============================ AUTH FLOW ============================ */
+	function onAuthChange(u){
+	  user=u||null;
+	  plannerHydrated=false;
+	  if(user){
+	    $('mcAvatar').style.display='none';
+	    refreshAuth().then(loadUserData).then(()=>{
+	      plannerHydrated=true;
+	      updateAuthButton();
+	      routeAfterAuth();
+	      if(activeTab && $('mcOverlay').classList.contains('open'))render();
+	    });
+	  }else{
+	    profile=null; attendance={}; notes={};
+	    plannerHydrated=true;
+	    updateAuthButton();
+	    renderSetupBanner();
+	    showAuthGate();
+	  }
+	}
+
+	async function loadUserData(){
+	  if(!user)return;
+	  hydrateLocalMirror();          // show device data instantly; cloud refines below
+	  try{
+	    const base=db.collection('users').doc(user.uid);
+    const [pSnap,aSnap,nSnap]=await Promise.all([
+      base.get(),
+      base.collection('meta').doc('attendance').get(),
+      base.collection('meta').doc('notes').get()
+	    ]);
+	    profile = pSnap.exists ? pSnap.data() : null;
+	    attendance = aSnap.exists ? (aSnap.data().records||{}) : attendance;
+	    notes = nSnap.exists ? (nSnap.data().byCourse||{}) : notes;
+	    saveAttendanceLocal(); saveNotesLocal();
+	    if(profile && !hasTimetable()){
+	      applyPlannerFromData(profile);
+	    }
+	    await savePlannerData({
+	      onboardingStep:profile&&profile.onboardingStep==='ready'&&hasReadyTimetable()?'ready':plannerPayload().onboardingStep
+	    },true);
+	  }catch(e){console.error('load failed',e);}
+	}
+
+async function saveAttendance(){
+  saveAttendanceLocal();                         // device mirror first — never lose it
+  if(!user||!db)return;
+  setSync('saving');
+  try{ await db.collection('users').doc(user.uid).collection('meta').doc('attendance')
+    .set({records:attendance, updatedAt:Date.now()},{merge:true}); setSync('saved'); }
+  catch(e){ handleSyncError(e); }
+}
+async function saveNotes(){
+  saveNotesLocal();
+  if(!user||!db)return;
+  setSync('saving');
+  try{ await db.collection('users').doc(user.uid).collection('meta').doc('notes')
+    .set({byCourse:notes, updatedAt:Date.now()},{merge:true}); setSync('saved'); }
+  catch(e){ handleSyncError(e); }
+}
+
+	function emailOk(email){
+	  const e=(email||'').toLowerCase().trim();
+	  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return false;
+	  return !REQUIRE_COLLEGE_EMAIL || e.endsWith('@'+ALLOWED_DOMAIN);
+	}
+	function emailRuleText(){
+	  return REQUIRE_COLLEGE_EMAIL ? 'Use your @'+ALLOWED_DOMAIN+' email' : 'Enter a valid email address';
+	}
+	function setAuthStatus(msg,type){
+	  const el=$('auStatus');
+	  if(!el)return;
+	  el.hidden=!msg;
+	  el.textContent=msg||'';
+	  el.className='mc-status '+(type||'info');
+	}
+	function emailActionSettings(){
+	  if(!/^https?:$/.test(location.protocol))return undefined;
+	  return {url:location.origin+location.pathname,handleCodeInApp:false};
+	}
+	function rememberAuthEmail(email){
+	  try{localStorage.setItem(LAST_AUTH_EMAIL_KEY,(email||'').trim().toLowerCase());}catch(e){}
+	}
+	function lastAuthEmail(){
+	  try{return localStorage.getItem(LAST_AUTH_EMAIL_KEY)||'';}catch(e){return '';}
+	}
+	function authMessage(e){
+	  const m={
+	    'auth/email-already-in-use':'That email already has an account. Switch to Log in instead.',
+	    'auth/invalid-email':'That email looks invalid.',
+	    'auth/weak-password':'Password too weak. Use at least 6 characters.',
+	    'auth/wrong-password':'Wrong password.',
+	    'auth/user-not-found':'No account with that email. Sign up first.',
+	    'auth/invalid-credential':'Email or password is incorrect.',
+	    'auth/too-many-requests':'Too many tries. Wait a bit and retry.',
+	    'auth/operation-not-allowed':'Sign-up is temporarily unavailable. Please try again later.',
+	    'auth/network-request-failed':'Network problem. Check your connection and try again.',
+	    'auth/unauthorized-domain':'Sign-in isn’t enabled for this web address yet. Please try again later.',
+	    'auth/quota-exceeded':'We’ve hit today’s email limit. Please try again later.',
+	    'auth/internal-error':'Something went wrong on our end. Please try again.'
+	  };
+	  return m[e&&e.code] || ((e&&e.message)?String(e.message).replace(/^(Firebase|Auth):\s*/i,''):'Something went wrong. Try again.');
+	}
+	async function sendVerificationEmail(targetUser,email,showStatus){
+	  if(!targetUser||targetUser.emailVerified)return true;
+	  try{
+	    await targetUser.sendEmailVerification(emailActionSettings());
+	    verificationNotice='Verification email sent to '+(email||targetUser.email)+'. It can take a minute — and please check your spam/junk folder if you don’t see it.';
+	    if(showStatus)setAuthStatus(verificationNotice,'ok');
+	    return true;
+	  }catch(e){
+	    console.error('verification email failed',e);
+	    verificationNotice='Account exists, but the verification email could not be sent: '+authMessage(e);
+	    if(showStatus)setAuthStatus(verificationNotice,'bad');
+	    return false;
+	  }
+	}
+
+		async function doSignup(name,roll,email,pw){
+		  const cleanEmail=(email||'').trim().toLowerCase();
+		  if(!emailOk(cleanEmail)){setAuthStatus(emailRuleText(),'bad');toast(emailRuleText());return false;}
+		  if(!name.trim()||!roll.trim()){setAuthStatus('Enter your name and roll number.','bad');toast('Enter your name and roll no');return false;}
+		  if(pw.length<6){setAuthStatus('Password must be at least 6 characters.','bad');toast('Password must be 6+ characters');return false;}
+		  try{
+		    setAuthStatus('Creating your account...', 'info');
+		    pendingAuthFlow='signup';
+		    const cred=await auth.createUserWithEmailAndPassword(cleanEmail,pw);
+		    profile={
+		      name:name.trim(), roll:roll.trim(), email:cleanEmail,
+		      courseIds:plannerIds(), section:activeSection||null, onboardingStep:'timetable',
+		      createdAt:Date.now(), updatedAt:Date.now(), emailVerified:!!cred.user.emailVerified
+		    };
+		    let cloudOk=true;
+		    try{await db.collection('users').doc(cred.user.uid).set(profile,{merge:true});}
+		    catch(e){cloudOk=false;console.error('profile create failed',e);}
+		    const verifyOk=await sendVerificationEmail(cred.user,cleanEmail,false);
+		    mcTrack('signup',{college_email:cleanEmail.endsWith('@'+ALLOWED_DOMAIN)?'yes':'no'});
+		    signupEmail=cleanEmail;
+		    rememberAuthEmail(cleanEmail);
+		    plannerHydrated=true;
+		    closeOverlay(true);
+		    renderSetupBanner(true);
+		    updateAuthButton();
+		    toast(verifyOk?'Verification email sent — build your timetable now':(cloudOk?'Account created — resend email from setup':'Account created — local setup is ready'));
+		    return true;
+		  }catch(e){authErr(e);return false;}
+		}
+
+		async function doLogin(email,pw){
+		  const cleanEmail=(email||'').trim().toLowerCase();
+		  if(!emailOk(cleanEmail)){setAuthStatus(emailRuleText(),'bad');toast(emailRuleText());return false;}
+		  try{
+		    setAuthStatus('Logging you in...', 'info');
+		    pendingAuthFlow='login';
+		    const cred=await auth.signInWithEmailAndPassword(cleanEmail,pw);
+		    if(!cred.user.emailVerified)await sendVerificationEmail(cred.user,cleanEmail,false);
+		    mcTrack('login',{verified:cred.user.emailVerified?'yes':'no'});
+		    rememberAuthEmail(cleanEmail);
+		    // onAuthStateChanged handles the rest
+		    return true;
+		  }catch(e){authErr(e);return false;}
+		}
+
+	async function doReset(email){
+	  const cleanEmail=(email||'').trim().toLowerCase();
+	  if(!emailOk(cleanEmail)){setAuthStatus(emailRuleText(),'bad');toast(emailRuleText());return;}
+	  try{
+	    setAuthStatus('Checking whether this email has a password account...', 'info');
+	    let methods=null, checked=false;
+	    try{
+	      methods=await auth.fetchSignInMethodsForEmail(cleanEmail);
+	      checked=true;
+	    }catch(e){
+	      console.warn('Could not check sign-in methods before reset',e);
+	      if(e&&e.code&&['auth/invalid-email','auth/unauthorized-domain','auth/network-request-failed','auth/operation-not-allowed'].includes(e.code)){throw e;}
+	    }
+	    const localMatch=lastAuthEmail()===cleanEmail;
+	    const hasKnownPassword=checked&&Array.isArray(methods)&&methods.includes('password');
+	    const hasKnownOtherMethod=checked&&Array.isArray(methods)&&methods.length&&!methods.includes('password');
+	    const lookupIsPrivate=checked&&Array.isArray(methods)&&methods.length===0;
+	    if(hasKnownOtherMethod){
+	      setAuthStatus('This email exists, but it is not a password account. Use the same sign-in method you used before.','bad');
+	      toast('This email is not a password account');
+	      return;
+	    }
+	    setAuthStatus('Sending password reset email...', 'info');
+	    await auth.sendPasswordResetEmail(cleanEmail,emailActionSettings());
+	    rememberAuthEmail(cleanEmail);
+	    const msg=hasKnownPassword
+	      ? 'Password reset link sent to '+cleanEmail+'. Check your inbox — and your spam/junk folder if you don’t see it.'
+	      : lookupIsPrivate
+	        ? 'Reset request accepted for '+cleanEmail+'. For your privacy we can’t reveal whether an account exists, so an email will arrive only if this address has already signed up. If nothing arrives in 2 minutes (check spam/junk too), sign up with this same email.'
+	        : 'Reset request accepted for '+cleanEmail+'. If it does not arrive (check spam/junk too), sign up first with this same email.';
+	    setAuthStatus(msg,'ok');
+	    toast('Password reset request sent');
+	  }
+	  catch(e){authErr(e);}
+	}
+
+		function authErr(e){
+		  pendingAuthFlow='';
+		  const msg=authMessage(e);
+		  setAuthStatus(msg,'bad');
+	  toast(msg);
+	  console.error(e);
+	}
+
+	/* ============================ OVERLAY OPEN/CLOSE ============================ */
+	let mcState='landing';   // 'landing' | 'login' | 'signup' | 'sent'
+	function openOverlay(lock){
+	  gateLocked=!!lock;
+	  if(!configured){
+	    toast('Accounts aren’t available right now — please try again later');
+	  }
+	  $('mcOverlay').classList.add('open');
+	  $('mcOverlay').setAttribute('aria-hidden','false');
+	  document.body.style.overflow='hidden';
+	  mcTrack('myclass_open',{signed_in:user?'yes':'no'});
+	  render();
+	}
+	function closeOverlay(force){
+	  if(gateLocked&&!force)return;
+	  gateLocked=false;
+	  $('mcOverlay').classList.remove('open');
+	  $('mcOverlay').setAttribute('aria-hidden','true');
+	  document.body.style.overflow='';
+	}
+	function showAuthGate(){
+	  mcState=mcState==='login'||mcState==='signup'||mcState==='sent'?mcState:'landing';
+	  openOverlay(true);
+	}
+	function routeAfterAuth(){
+	  const flow=pendingAuthFlow;
+	  pendingAuthFlow='';
+	  gateLocked=false;
+	  renderSetupBanner(flow==='signup');
+	  if(!hasTimetable()||flow==='signup'){
+	    closeOverlay(true);
+	    setTimeout(()=>{if(window.innerWidth<=1000)openPanel();},120);
+	    return;
+	  }
+	  // Already signed in with a clean week → drop straight into Today's dashboard
+	  if(hasReadyTimetable()){
+	    activeTab='today';
+	    backfillOpen=false;
+	    openOverlay(false);
+	    return;
+	  }
+	  if($('mcOverlay').classList.contains('open'))render();
+	}
+	function updateAuthButton(){
+	  const btn=$('mcOpen'); if(!btn)return;
+	  const label=btn.querySelector('.lbl');
+	  btn.classList.toggle('ghost',!!user&&hasReadyTimetable());
+	  if(!user)label.textContent='Log in';
+	  else if(!hasReadyTimetable())label.textContent='Finish setup';
+	  else label.textContent='My class';
+	}
+
+/* ============================ RENDER ROUTER ============================ */
+	function render(){
+	  const tabs=$('mcTabs'), title=$('mcTitle'), avatar=$('mcAvatar');
+	  const loggedIn = !!user;
+	  const close=$('mcClose');
+	  if(close)close.style.display = loggedIn ? 'flex' : 'none';
+	  const home=$('mcHome');
+	  if(home)home.style.display = loggedIn ? 'inline-flex' : 'none';
+	  setSync(syncStatus);
+
+	  if(!loggedIn){
+	    tabs.style.display='none';
+	    avatar.style.display='none';
+    title.textContent='My Class';
+    $('mcContent').innerHTML = renderAuth();
+    wireAuth();
+    return;
+  }
+
+  tabs.style.display='flex';
+  // build / rebuild tab buttons (mess hidden if disabled)
+  syncTabs();
+  title.textContent = profile && profile.name ? profile.name.split(' ')[0]+"'s week" : 'My Class';
+
+  const c=$('mcContent');
+  if(activeTab==='today')  c.innerHTML=renderToday();
+  else if(activeTab==='tomorrow') c.innerHTML=renderToday();
+  else if(activeTab==='attend') c.innerHTML=renderAttend();
+  else if(activeTab==='notes')  c.innerHTML=renderNotes();
+  else if(activeTab==='mess')   c.innerHTML=renderMess();
+  else if(activeTab==='more')   c.innerHTML=renderMore();
+  wireBody();
+}
+
+function syncTabs(){
+  $('mcTabs').querySelectorAll('.mc-tab').forEach(b=>{
+    const t=b.dataset.tab;
+    if(t==='mess'){ b.style.display = MESS_ENABLED?'inline-flex':'none'; }
+    b.classList.toggle('on', t===activeTab);
+  });
+}
+
+/* ============================ AUTH SCREEN ============================ */
+let signupEmail='';   // remembered for the "check your email" screen
+
+function renderAuth(){
+  if(!configured){
+    return `<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      <h3>Sign-in unavailable</h3><p>Accounts aren’t available right now. Please try again later.</p></div>`;
+  }
+  if(mcState==='landing') return renderLanding();
+  if(mcState==='sent')    return renderSent();
+  return renderForm();
+}
+
+function renderLanding(){
+  const feats=[
+    ['M12 7v5l3 2','M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z','Your day at a glance','Open the app and instantly see today\u2019s classes, rooms and timings \u2014 nothing to dig for.'],
+    ['M9 11l3 3L22 4','M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11','Track attendance','One tap to mark Present, Absent or Cancelled — even for past dates. See your % per course with an 85% safety line.'],
+    ['M4 4h16v12l-4 4H4z','M16 20v-4h4','Notes per class','Jot what to bring, quiz dates and readings. Saved automatically against each course.'],
+    ['M8 2v4M16 2v4M3 10h18','M9 16l2 2 4-4','Add to your calendar','Push every class of the whole module into your phone\u2019s calendar, with a reminder before each one.']
+  ];
+  return `<div class="mc-land">
+    <div class="mc-hero">
+      <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <h2>Your week, sorted.</h2>
+      <p>Attendance, daily schedule, class notes and calendar reminders \u2014 in one place, for IIM Mumbai.</p>
+      <button class="mc-cta" id="auStart">Get started</button>
+      <button class="mc-linkbtn" id="auHaveAcc" style="margin-top:12px">I already have an account</button>
+    </div>
+    <div class="mc-feats">
+      ${feats.map(([p1,p2,t,d])=>`
+        <div class="mc-feat">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="${p1}"/><path d="${p2}"/></svg></div>
+          <div class="tx"><b>${t}</b><span>${d}</span></div>
+        </div>`).join('')}
+	    </div>
+	    <div class="mc-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="M9 12l2 2 4-4"/></svg>
+	      Private to you. Sign up with an email you can verify.</div>
+	  </div>`;
+	}
+
+function renderForm(){
+  const isLogin = mcState==='login';
+  return `<div class="mc-login">
+    <button class="mc-back" id="auBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
+    <div class="glyph sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+    <div class="mc-seg">
+      <button class="${isLogin?'on':''}" data-m="login">Log in</button>
+      <button class="${isLogin?'':'on'}" data-m="signup">Sign up</button>
+    </div>
+    <div style="text-align:left;display:flex;flex-direction:column;gap:11px;margin-top:18px">
+      ${isLogin?'':`
+        <label class="mc-lab">Full name</label>
+        <input class="mc-in" id="auName" placeholder="Pulkit" autocomplete="name">
+        <label class="mc-lab">Roll number</label>
+        <input class="mc-in" id="auRoll" placeholder="25010xxxx" autocomplete="off">`}
+	      <label class="mc-lab">Email</label>
+	      <input class="mc-in" id="auEmail" type="email" value="${safe(lastAuthEmail())}" placeholder="name.250xxx@iimmumbai.ac.in" autocomplete="email" inputmode="email">
+	      <label class="mc-lab">Password</label>
+	      <div class="mc-pw">
+	        <input class="mc-in" id="auPw" type="password" placeholder="${isLogin?'Your password':'Create a password (6+ chars)'}" autocomplete="${isLogin?'current-password':'new-password'}">
+	        <button type="button" class="mc-eye" id="auEye" aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+	      </div>
+	      <div class="mc-status" id="auStatus" role="status" aria-live="polite" hidden></div>
+		      <button class="mc-cta" id="auGo" style="margin-top:6px">${isLogin?'Log in':'Create account and build timetable'}</button>
+		      ${isLogin?'<button class="mc-linkbtn" id="auReset" style="align-self:center;margin-top:4px">Forgot password?</button>':''}
+		    </div>
+		    ${isLogin?'':'<div class="mc-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg><span>Verification email lands in your <b>Junk / Spam</b> folder &mdash; open it there to verify.</span></div>'}
+		    <div class="fine">${REQUIRE_COLLEGE_EMAIL?'Only <b>@'+ALLOWED_DOMAIN+'</b> emails are accepted.':'Use any email you can open right now.'}${isLogin?'':' After verifying, you can build your timetable straight away.'}</div>
+		  </div>`;
+		}
+
+function renderSent(){
+  return `<div class="mc-login mc-verify">
+    <div class="glyph ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
+    <h2>Verify your email</h2>
+    <p>Sent to <b style="color:var(--ink)">${safe(signupEmail)}</b>.<br>It lands in your <b>Junk / Spam</b> folder &mdash; not the inbox.</p>
+    <a class="mc-cta" href="https://outlook.cloud.microsoft/mail/junkemail/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>Open Junk folder &amp; verify</a>
+    <button class="mc-linkbtn mc-verify-login" id="auToLogin">I&rsquo;ve verified &mdash; log in</button>
+    <div class="fine">Didn&rsquo;t arrive? Check spam too, or <button class="mc-linkbtn" id="auReSignup">resend</button>.</div>
+  </div>`;
+}
+
+function wireAuth(){
+  if(!configured)return;
+  // landing
+  const start=$('auStart'); if(start)start.onclick=()=>{mcState='signup';render();};
+  const have=$('auHaveAcc'); if(have)have.onclick=()=>{mcState='login';render();};
+  // sent screen
+  const toLogin=$('auToLogin'); if(toLogin)toLogin.onclick=()=>{mcState='login';render();};
+  const reSignup=$('auReSignup'); if(reSignup)reSignup.onclick=()=>{mcState='signup';render();};
+  // form: back + segmented toggle
+  const back=$('auBack'); if(back)back.onclick=()=>{mcState='landing';render();};
+  $('mcContent').querySelectorAll('.mc-seg button').forEach(b=>{
+    b.onclick=()=>{mcState=b.dataset.m;render();};
+  });
+	  // password show/hide
+	  const eye=$('auEye'); if(eye)eye.onclick=()=>{const i=$('auPw'); if(!i)return; const show=i.type==='password'; i.type=show?'text':'password'; eye.classList.toggle('on',show); try{i.focus();}catch(e){}};
+	  // focus the first empty field for faster entry
+	  setTimeout(()=>{const nm=$('auName'), em=$('auEmail'); const first=(nm&&!nm.value)?nm:((em&&!em.value)?em:$('auPw')); try{first&&first.focus({preventScroll:true});}catch(e){}},60);
+	  // submit
+		  const go=$('auGo');
+		  if(go)go.onclick=async()=>{
+		    const email=$('auEmail').value, pw=$('auPw').value;
+		    const oldText=go.textContent;
+		    go.disabled=true;
+		    go.textContent=mcState==='login'?'Logging in...':'Creating account...';
+		    try{
+		      if(mcState==='login') await doLogin(email,pw);
+		      else await doSignup($('auName').value,$('auRoll').value,email,pw);
+		    }finally{
+		      if(document.body.contains(go)){go.disabled=false;go.textContent=oldText;}
+		    }
+		  };
+	  const rst=$('auReset'); if(rst)rst.onclick=()=>doReset($('auEmail').value);
+	  ['auEmail','auPw','auName','auRoll'].forEach(id=>{const el=$(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')go&&go.click();});});
+	}
+
+	/* ============================ TIMETABLE SETUP ============================ */
+	function renderSetupBanner(force){
+	  const banner=$('setupBanner'); if(!banner)return;
+	  if(!user){banner.hidden=true;return;}
+	  const ids=plannerIds();
+	  const clashes=clashCount(ids);
+	  const ready=ids.length>0&&clashes===0;
+	  const stillSettingUp=force || !profile || profile.onboardingStep!=='ready' || !ready;
+	  banner.hidden=!stillSettingUp;
+	  $('setupTitle').textContent = ready ? 'Timetable ready' : 'Create your timetable';
+		  $('setupText').textContent = !ids.length
+		    ? 'Start with your section. Your compulsory courses will appear automatically, then add electives.'
+		    : clashes
+		      ? 'You have '+clashes+' clash'+(clashes>1?'es':'')+'. Resolve overlaps before moving to My Class.'
+		      : 'Looks clean. Save it once, then Today, Attendance, Notes and Calendar will use this week.';
+		  if(user&&!user.emailVerified){
+		    $('setupText').textContent = (verificationNotice||'Check your inbox — and your spam/junk folder — for the verification link.')+' '+$('setupText').textContent;
+		  }
+		  const verify=$('setupVerify');
+		  if(verify)verify.hidden=!user||user.emailVerified;
+		  const done=$('setupDone');
+		  done.disabled=!ready;
+		  done.textContent = ready ? 'Save and open My Class' : (clashes?'Resolve clashes':'Pick courses first');
+		}
+		function wireSetupBanner(){
+		  const verify=$('setupVerify');
+		  if(verify)verify.onclick=async()=>{
+		    if(!user)return;
+		    verify.disabled=true;
+		    const ok=await sendVerificationEmail(user,user.email,true);
+		    renderSetupBanner(true);
+		    toast(ok?'Verification email sent':'Could not send verification email');
+		    verify.disabled=false;
+		  };
+		  const edit=$('setupEdit');
+		  if(edit)edit.onclick=()=>{openPanel();toast('Pick your section and courses here');};
+	  const done=$('setupDone');
+	  if(done)done.onclick=async()=>{
+	    if(!hasTimetable()){openPanel();toast('Pick your section or courses first');return;}
+	    if(plannerClashes()){openPanel();toast('Resolve clashes before continuing');return;}
+	    done.disabled=true;
+	    await savePlannerData({onboardingStep:'ready'},false);
+	    renderSetupBanner(false);
+	    activeTab='today';
+	    openOverlay(false);
+	    toast('Timetable saved');
+	  };
+	}
+
+/* ============================ TODAY HUB ============================ */
+	function renderToday(){
+  if(!myCourses().length)return emptyPick();
+  const off = activeTab==='tomorrow' ? 1 : 0;
+  const base=new Date();
+  const dObj=new Date(base.getFullYear(),base.getMonth(),base.getDate()+off);
+  const ds=dateKeyOf(dObj);
+  const day=WDAYS[dObj.getDay()];
+  const isToday = off===0;
+  const isWeekend = day==='Sunday'||day==='Saturday';
+  const list=sessionsOn(day);
+  const reason=noClassReason(ds);
+  let h=`<div class="mc-sub">${isToday?prettyDate():prettyDateFor(ds)}</div>
+  <div class="mc-actions">
+    <button class="mc-actbtn" id="tdTimetable"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg>View timetable</button>
+    <button class="mc-actbtn" id="tdBackfill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 16l2 2 4-4"/></svg>Add past attendance</button>
+  </div>`;
+
+  if(isToday){
+    const pend=recentUnmarked(7);
+    if(pend.length){
+      h+=`<div class="mc-prompt" data-date="${pend[0].ds}"><div class="mc-prompt-tx"><b>${pend.length} unmarked ${pend.length===1?'class':'classes'}</b><span>from the past week — add them so your % stays accurate.</span></div><button class="mc-prompt-go" id="tdPromptGo">Mark now</button></div>`;
+    }
+  }
+
+  if(MESS_ENABLED && isToday){ h+=renderMessCardForToday(); }
+
+  h+=`<div class="mc-h">${isToday?'Today':'Tomorrow'}&rsquo;s classes <span class="pill">${reason?0:list.length}</span></div>`;
+  if(reason){
+    h+=`<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+      <h3>No classes — ${safe(reason)}</h3><p>${isToday?'Enjoy the day off. Attendance isn&rsquo;t counted today.':'Holiday or exam day — nothing scheduled.'}</p></div>`;
+  }else if(!list.length){
+    h+=`<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      <h3>${isWeekend?'Weekend':'No classes'}</h3><p>${isWeekend?'Enjoy the break.':'Nothing on the timetable for '+day+'.'}</p></div>`;
+  }else{
+    list.forEach(({c,s})=>{
+      const ac=acOf(c.slot);
+      const key=ds+'|'+c.id+'|'+s.start;
+      const st=attendance[key]||'';
+      const note=(notes[c.id]||'').trim();
+      h+=`<div class="mc-card" style="--ac:${ac}">
+        <div class="ct">
+          <div class="time"><b>${s.start}</b><span>${s.e||s.end||''}</span></div>
+          <div class="info">
+            <div class="nm">${safe(c.course)}</div>
+            <div class="meta"><span>${safe((s.faculty||c.faculty.join(', ')).split(' / ')[0])}</span><em>Room ${safe(s.room||'-')}</em></div>
+          </div>
+        </div>`;
+      if(isToday){
+        h+=`<div class="mc-att" data-key="${key}">
+          <button class="pres${st==='present'?' on':''}" data-v="present"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg>Present</button>
+          <button class="abs${st==='absent'?' on':''}" data-v="absent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12"/></svg>Absent</button>
+          <button class="canc${st==='cancelled'?' on':''}" data-v="cancelled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14"/></svg>Cancelled</button>
+        </div>
+        <div class="mc-card-noteedit" data-cid="${c.id}">
+          <textarea placeholder="Note or reminder for next class…">${safe(notes[c.id]||'')}</textarea>
+          <span class="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg>Saved</span>
+        </div>`;
+      }else if(note){
+        h+=`<div class="mc-card-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4"/></svg><span>${safe(note)}</span></div>`;
+      }
+      h+=`</div>`;
+    });
+  }
+
+  // mark an extra / surprise class that happened today but isn't on the timetable
+  if(isToday){
+    h+=`<div class="mc-h" style="margin-top:22px;font-size:14px">Extra class today?</div>
+      <div class="mc-sub">Surprise, rescheduled or makeup class that isn&rsquo;t on your timetable? Mark it here.</div>
+      <div class="bf-extra" data-date="${ds}">
+        <select class="mc-in">${myCourses().map(c=>`<option value="${c.id}">${safe(c.course)}</option>`).join('')}</select>
+        <div class="bf-extra-btns">
+          <button class="bf-extra-add pres" data-status="present">+ Present</button>
+          <button class="bf-extra-add abs" data-status="absent">+ Absent</button>
+        </div>
+      </div>`;
+    const extras=Object.keys(attendance).filter(k=>k.indexOf(ds+'|')===0 && (k.split('|')[2]||'').charAt(0)==='x');
+    if(extras.length){
+      h+=`<div style="margin-top:6px">`;
+      extras.forEach(k=>{ const cid=+k.split('|')[1]; const c=byId(cid); const v=attendance[k];
+        h+=`<div class="bf-extra-row"><span class="dot" style="background:${c?acOf(c.slot):'#9aa'}"></span><span class="nm">${safe(c?c.course:'Course')}</span><span class="st ${v}">${v}</span><button class="bf-extra-del" data-key="${k}" aria-label="Remove">&times;</button></div>`;
+      });
+      h+=`</div>`;
+    }
+  }
+  return h;
+}
+
+/* ============================ ATTENDANCE ============================ */
+function renderAttend(){
+  const courses=myCourses();
+  if(!courses.length) return emptyPick();
+  if(backfillOpen) return renderBackfill();
+  // tally per course from attendance map (keys: date|courseId|start)
+  const tally={};
+  courses.forEach(c=>tally[c.id]={present:0,absent:0,cancelled:0});
+  Object.entries(attendance).forEach(([k,v])=>{
+    const cid=+k.split('|')[1];
+    if(tally[cid]&&tally[cid][v]!=null)tally[cid][v]++;
+  });
+  let tp=0,th=0;
+  courses.forEach(c=>{const t=tally[c.id];tp+=t.present;th+=t.present+t.absent;});
+  const overall=th?Math.round(tp/th*100):null;
+  const cls=p=>p==null?'none':p>=ATTEND_THRESHOLD?'ok':p>=ATTEND_THRESHOLD-10?'warn':'bad';
+  const col=p=>p==null?'var(--ink-4)':p>=ATTEND_THRESHOLD?'var(--ok)':p>=ATTEND_THRESHOLD-10?'#D97706':'var(--warn)';
+
+  let h=`<div class="mc-overall"><div class="big ${cls(overall)}">${overall==null?'—':overall+'%'}</div>
+    <div class="lab">Overall attendance<br><b>${tp}</b> attended of <b>${th}</b> held · ${ATTEND_THRESHOLD}% line</div></div>`;
+  h+=`<div class="mc-seg mc-attendtoggle">
+    <button class="${attendView==='sheet'?'':'on'}" data-view="summary">Summary</button>
+    <button class="${attendView==='sheet'?'on':''}" data-view="sheet">Sheet</button>
+  </div>`;
+  h+=`<button class="mc-actbtn accent" id="bfOpen" style="width:100%;margin-bottom:18px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M12 14v4M10 16h4"/></svg>Add or edit past attendance</button>`;
+
+  if(attendView==='sheet'){ h+=renderSheet(); return h; }
+
+  h+=`<div class="mc-h">By course <span class="pill">${courses.length}</span></div>`;
+  courses.forEach(c=>{
+    const t=tally[c.id], held=t.present+t.absent;
+    const p=held?Math.round(t.present/held*100):null;
+    // Total is always fixed (20, or 10 for micro-credits): a cancelled class gets rescheduled, it is NOT removed.
+    const total=totalClassesFor(c), micro=isMicrocredit(c);
+    const needPresent=Math.ceil(ATTEND_THRESHOLD/100*total);
+    const maxMiss=Math.max(0,total-needPresent);
+    const missLeft=maxMiss-t.absent;
+    const maxReach=Math.round((total-t.absent)/total*100);
+    let safeCls,safeTx;
+    if(maxReach<ATTEND_THRESHOLD){ safeCls='bad'; safeTx=`⚠ ${ATTEND_THRESHOLD}% is no longer reachable — too many absences`; }
+    else if(missLeft<0){ safeCls='bad'; safeTx=`⚠ ${-missLeft} absence${-missLeft>1?'s':''} over the limit — below ${ATTEND_THRESHOLD}%`; }
+    else if(missLeft===0){ safeCls='warn'; safeTx=`No absences left — attend every remaining class to keep ${ATTEND_THRESHOLD}%`; }
+    else { safeCls='ok'; safeTx=`Can miss ${missLeft} more · need ${needPresent}/${total} to stay at ${ATTEND_THRESHOLD}%`; }
+    h+=`<div class="mc-arow">
+      <div class="top"><span class="nm">${safe(c.course)}${micro?' <span class="mc-tag-micro">Micro-credit</span>':''}</span><span class="pct ${cls(p)}">${p==null?'—':p+'%'}</span></div>
+      <div class="mc-bar"><i style="width:${p||0}%;background:${col(p)}"></i><span class="line75"></span></div>
+      <div class="nums">
+        <span><span class="dot" style="background:var(--ok)"></span><b>${t.present}</b> present</span>
+        <span><span class="dot" style="background:var(--warn)"></span><b>${t.absent}</b> absent</span>
+        <span><span class="dot" style="background:var(--ink-3)"></span><b>${t.cancelled}</b> cancelled</span>
+        <span><b>${total}</b> total</span>
+      </div>
+      <div class="mc-safe ${safeCls}">${safeTx}</div></div>`;
+  });
+  h+=`<div class="mc-sub" style="margin-top:14px">Cancelled classes don’t count against you. Mark today’s classes from the <b>Today</b> tab, or use <b>Add past attendance</b> to fill in earlier days.</div>`;
+  return h;
+}
+
+/* full attendance register — every dated mark, newest first */
+const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SHEET_ICON={present:'M20 6 9 17l-5-5',absent:'M18 6 6 18M6 6l12 12',cancelled:'M5 12h14'};
+function renderSheet(){
+  const entries=Object.keys(attendance).map(k=>{
+    const p=k.split('|'); const marker=p[2]||''; const extra=marker.charAt(0)==='x';
+    return {k,date:p[0],cid:+p[1],start:extra?'':marker,extra,status:attendance[k]};
+  }).filter(e=>e.date && byId(e.cid) && ['present','absent','cancelled'].includes(e.status));
+  if(!entries.length){
+    return `<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M9 16l2 2 4-4"/></svg>
+      <h3>No attendance yet</h3><p>Mark classes from <b>Today</b>, or use <b>Add past attendance</b> to fill in earlier days. They’ll show here as a dated sheet.</p></div>`;
+  }
+  const byDate={};
+  entries.forEach(e=>{(byDate[e.date]=byDate[e.date]||[]).push(e);});
+  const dates=Object.keys(byDate).sort().reverse();
+  let pr=0,ab=0,ca=0;
+  entries.forEach(e=>{ if(e.status==='present')pr++; else if(e.status==='absent')ab++; else ca++; });
+  let h=`<div class="sheet-legend"><span><b>${pr}</b> present</span><span><b>${ab}</b> absent</span><span><b>${ca}</b> cancelled</span><span class="g">${entries.length} marks · ${dates.length} days</span></div>`;
+  dates.forEach(d=>{
+    const rows=byDate[d].slice().sort((a,b)=>(a.extra-b.extra)||a.start.localeCompare(b.start));
+    const dd=dateFromKey(d);
+    h+=`<div class="sheet-day"><div class="sheet-dh"><span class="sd">${WDAYS[dd.getDay()].slice(0,3)}, ${dd.getDate()} ${MON3[dd.getMonth()]}</span><button class="sheet-edit" data-date="${d}">Edit</button></div>`;
+    rows.forEach(e=>{ const c=byId(e.cid), ac=acOf(c.slot);
+      h+=`<div class="sheet-row"><span class="t">${e.extra?'+':e.start}</span><span class="cdot" style="background:${ac}"></span><span class="nm">${safe(c.course)}${e.extra?' <span class="xt">extra</span>':''}</span><span class="st ${e.status}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="${SHEET_ICON[e.status]||''}"/></svg>${e.status}</span></div>`;
+    });
+    h+=`</div>`;
+  });
+  return h;
+}
+
+/* ---- backfill: mark attendance for a past date (keyed date|courseId|start, same as Today) ---- */
+function renderBackfill(){
+  const dateStr = backfillDate || todayKey();
+  const beforeStart = dateStr < MODULE_START;
+  const reason = noClassReason(dateStr);
+  const wd = WDAYS[dateFromKey(dateStr).getDay()];
+  const isWeekend = wd==='Saturday'||wd==='Sunday';
+  const list = sessionsOn(wd);
+  const blocked = beforeStart || !!reason || isWeekend || !list.length;
+  let h=`<button class="mc-back" id="bfBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>Back to summary</button>
+    <div class="mc-h" style="clear:both">Add past attendance</div>
+    <div class="mc-sub">Pick a date, then mark each class you attended, missed or that got cancelled. Saved to your account right away.</div>
+    <label class="mc-lab" style="display:block;margin:0 0 7px">Date</label>
+    <input class="mc-in" id="bfDate" type="date" value="${dateStr}" min="${MODULE_START}" max="${todayKey()}" style="margin-bottom:18px">
+    <div class="mc-h" style="font-size:13px">${prettyDateFor(dateStr)} <span class="pill">${blocked?0:list.length} ${list.length===1?'class':'classes'}</span></div>`;
+  if(beforeStart){
+    h+=`<div class="mc-empty" style="padding:30px 20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      <h3>Before the module</h3><p>Module 5 started on 15 June 2026 — pick a later date.</p></div>`;
+  }else if(reason){
+    h+=`<div class="mc-empty" style="padding:30px 20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+      <h3>No classes — ${safe(reason)}</h3><p>This was a holiday or exam day.</p></div>`;
+  }else if(isWeekend||!list.length){
+    h+=`<div class="mc-empty" style="padding:30px 20px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+      <h3>No classes</h3><p>${isWeekend?'That was a weekend — nothing scheduled.':'Nothing was on your timetable for '+wd+'.'}</p></div>`;
+  }else{
+    list.forEach(({c,s})=>{
+      const ac=acOf(c.slot);
+      const key=dateStr+'|'+c.id+'|'+s.start;
+      const st=attendance[key]||'';
+      h+=`<div class="mc-card" style="--ac:${ac}">
+        <div class="ct">
+          <div class="time"><b>${s.start}</b><span>${s.e||s.end||''}</span></div>
+          <div class="info">
+            <div class="nm">${safe(c.course)}</div>
+            <div class="meta"><span>${safe((s.faculty||c.faculty.join(', ')).split(' / ')[0])}</span><em>Room ${safe(s.room||'-')}</em></div>
+          </div>
+        </div>
+        <div class="mc-att" data-key="${key}">
+          <button class="pres${st==='present'?' on':''}" data-v="present"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg>Present</button>
+          <button class="abs${st==='absent'?' on':''}" data-v="absent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12"/></svg>Absent</button>
+          <button class="canc${st==='cancelled'?' on':''}" data-v="cancelled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14"/></svg>Cancelled</button>
+        </div>
+      </div>`;
+    });
+  }
+  if(!beforeStart){
+    h+=`<div class="mc-h" style="margin-top:24px;font-size:13px">Extra class on this day</div>
+      <div class="mc-sub">Had a class that wasn&rsquo;t on your timetable? Add it here.</div>
+      <div class="bf-extra" data-date="${dateStr}">
+        <select class="mc-in">${myCourses().map(c=>`<option value="${c.id}">${safe(c.course)}</option>`).join('')}</select>
+        <div class="bf-extra-btns">
+          <button class="bf-extra-add pres" data-status="present">+ Present</button>
+          <button class="bf-extra-add abs" data-status="absent">+ Absent</button>
+        </div>
+      </div>`;
+    const extras=Object.keys(attendance).filter(k=>k.indexOf(dateStr+'|')===0 && (k.split('|')[2]||'').charAt(0)==='x');
+    if(extras.length){
+      h+=`<div style="margin-top:6px">`;
+      extras.forEach(k=>{ const cid=+k.split('|')[1]; const c=byId(cid); const v=attendance[k];
+        h+=`<div class="bf-extra-row"><span class="dot" style="background:${c?acOf(c.slot):'#9aa'}"></span><span class="nm">${safe(c?c.course:'Course')}</span><span class="st ${v}">${v}</span><button class="bf-extra-del" data-key="${k}" aria-label="Remove">&times;</button></div>`;
+      });
+      h+=`</div>`;
+    }
+  }
+  return h;
+}
+
+/* ============================ NOTES ============================ */
+function renderNotes(){
+  const courses=myCourses();
+  if(!courses.length) return emptyPick();
+  let h=`<div class="mc-h">Notes by course <span class="pill">${courses.length}</span></div>
+    <div class="mc-sub">Jot what to bring, quiz dates, readings \u2014 saved automatically.</div>`;
+  courses.forEach(c=>{
+    h+=`<div class="mc-note" data-cid="${c.id}">
+      <div class="nh"><span class="dot" style="background:${acOf(c.slot)}"></span><span class="nm">${safe(c.course)}</span></div>
+      <textarea placeholder="Add a note for ${safe(c.course)}\u2026">${safe(notes[c.id]||'')}</textarea>
+      <div class="nf"><span class="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg>Saved</span></div>
+    </div>`;
+  });
+  return h;
+}
+
+/* ============================ MESS (hidden until enabled) ============================ */
+const MESS_MENU = {
+  /* Fill this when ready, e.g.:
+     Monday:{breakfast:'Poha, Tea', lunch:'Dal, Rice, Paneer', snacks:'Samosa', dinner:'Roti, Sabzi'} */
+};
+function renderMessCardForToday(){
+  const m=MESS_MENU[dayName()];
+  if(!m) return '';
+  return `<div class="mc-h">Mess menu</div>
+    <div class="mc-card" style="--ac:#D97706">${
+      ['breakfast','lunch','snacks','dinner'].filter(k=>m[k]).map(k=>
+        `<div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--line-2)">
+          <b style="flex:0 0 84px;text-transform:capitalize;font-size:13px">${k}</b>
+          <span style="font-size:13px;color:var(--ink-2)">${safe(m[k])}</span></div>`).join('')
+    }</div>`;
+}
+function renderMess(){
+  const m=MESS_MENU[dayName()];
+  if(!m) return `<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2M5 2v20M16 2a4 4 0 0 0-4 4v7h4m0-11v20"/></svg>
+    <h3>Menu coming soon</h3><p>The mess menu isn\u2019t loaded yet.</p></div>`;
+  return `<div class="mc-h">Today \u2014 ${dayName()}</div>`+renderMessCardForToday();
+}
+
+/* ============================ MORE ============================ */
+	function renderMore(){
+	  const e=profile?profile.email:(user?user.email:'');
+	  const nm=profile?profile.name:'';
+	  const rl=profile?profile.roll:'';
+  return `<div class="mc-h">Account</div>
+    <div class="mc-arow"><div style="font-size:14px"><b>${safe(nm||'\u2014')}</b><br>
+      <span style="color:var(--ink-3);font-size:12.5px">${safe(rl)} \u00b7 ${safe(e)}</span></div></div>
+    <div class="mc-h" style="margin-top:20px">Calendar</div>
+    <div class="mc-sub">Adds <b>every Module 5 class</b> (from now until 29 Aug) to your phone\u2019s calendar, with a reminder before each one. Holidays and exam days are skipped automatically.</div>
+	    <button class="mc-ics" id="mcIcs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M9 16l2 2 4-4"/></svg>Add all my Module 5 classes</button>
+	    <button class="mc-signout" id="mcEditPlanner" style="color:var(--ink);margin-top:10px">Edit timetable</button>
+	    <button class="mc-signout" id="mcOut">Sign out</button>
+	    <div class="mc-sub" style="margin-top:18px;text-align:center">Made by Pulkit with \u2764\ufe0f</div>`;
+	}
+
+	function emptyPick(){
+	  return `<div class="mc-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+	    <h3>Create your timetable first</h3><p>Pick your section and courses once. Then your day, attendance, notes and calendar all work from the same week.</p>
+	    <button class="mc-ics" id="mcGoPlanner" style="margin-top:18px">Build timetable</button></div>`;
+	}
+
+/* ============================ BODY WIRING ============================ */
+let noteTimer={};
+function wireBody(){
+  // attendance buttons
+  $('mcContent').querySelectorAll('.mc-att').forEach(grp=>{
+    const key=grp.dataset.key;
+    grp.querySelectorAll('button').forEach(b=>{
+      b.onclick=()=>{
+        const v=b.dataset.v;
+        if(attendance[key]===v){delete attendance[key];}   // tap again to clear
+        else{attendance[key]=v;}
+        grp.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+        if(attendance[key])b.classList.add('on');
+        saveAttendance();
+        mcTrack('attendance_mark',{status:attendance[key]||'cleared',tab:activeTab});
+      };
+    });
+  });
+  // notes autosave (debounced)
+  $('mcContent').querySelectorAll('.mc-note[data-cid]').forEach(n=>{
+    const cid=+n.dataset.cid, ta=n.querySelector('textarea'), saved=n.querySelector('.saved');
+    if(!ta)return;
+    ta.addEventListener('input',()=>{
+      notes[cid]=ta.value;
+      clearTimeout(noteTimer[cid]);
+      noteTimer[cid]=setTimeout(()=>{
+        saveNotes();
+        if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1600);}
+      },600);
+    });
+  });
+  // inline note/reminder on Today's class cards (write while you mark)
+  $('mcContent').querySelectorAll('.mc-card-noteedit[data-cid]').forEach(n=>{
+    const cid=+n.dataset.cid, ta=n.querySelector('textarea'), saved=n.querySelector('.saved');
+    if(!ta)return;
+    ta.addEventListener('input',()=>{
+      notes[cid]=ta.value;
+      clearTimeout(noteTimer[cid]);
+      noteTimer[cid]=setTimeout(()=>{
+        saveNotes();
+        if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1600);}
+      },600);
+    });
+  });
+	  // today quick actions
+	  const tdTimetable=$('tdTimetable'); if(tdTimetable)tdTimetable.onclick=()=>closeOverlay(false);
+	  const tdBackfill=$('tdBackfill'); if(tdBackfill)tdBackfill.onclick=()=>{activeTab='attend';backfillOpen=true;render();};
+	  const tdPromptGo=$('tdPromptGo'); if(tdPromptGo)tdPromptGo.onclick=()=>{const host=tdPromptGo.closest('.mc-prompt');activeTab='attend';backfillOpen=true;backfillDate=(host&&host.dataset.date)||todayKey();render();};
+	  // attendance summary / sheet toggle + per-day edit from the sheet
+	  $('mcContent').querySelectorAll('.mc-attendtoggle button').forEach(b=>{ b.onclick=()=>{ attendView=b.dataset.view; render(); }; });
+	  $('mcContent').querySelectorAll('.sheet-edit').forEach(b=>{ b.onclick=()=>{ backfillOpen=true; backfillDate=b.dataset.date||todayKey(); render(); }; });
+	  // attendance backfill
+	  const bfOpen=$('bfOpen'); if(bfOpen)bfOpen.onclick=()=>{backfillOpen=true;render();};
+	  const bfBack=$('bfBack'); if(bfBack)bfBack.onclick=()=>{backfillOpen=false;render();};
+	  const bfDate=$('bfDate'); if(bfDate)bfDate.onchange=()=>{backfillDate=bfDate.value||todayKey();render();};
+	  // extra (off-timetable) class on the backfill date
+	  $('mcContent').querySelectorAll('.bf-extra-add').forEach(b=>{ b.onclick=()=>{ const wrap=b.closest('.bf-extra'); const sel=wrap&&wrap.querySelector('select'); if(!sel)return; const cid=+sel.value; const date=(wrap&&wrap.dataset.date)||backfillDate||todayKey(); const key=date+'|'+cid+'|x'+Date.now(); attendance[key]=b.dataset.status; saveAttendance(); render(); mcTrack('extra_class_add',{status:b.dataset.status}); toast('Extra class added'); }; });
+	  $('mcContent').querySelectorAll('.bf-extra-del').forEach(b=>{ b.onclick=()=>{ delete attendance[b.dataset.key]; saveAttendance(); render(); toast('Removed'); }; });
+	  // more-tab buttons
+	  const ics=$('mcIcs'); if(ics)ics.onclick=exportICS;
+	  const planner=$('mcGoPlanner'); if(planner)planner.onclick=()=>{closeOverlay(true);openPanel();renderSetupBanner(true);};
+	  const editPlanner=$('mcEditPlanner'); if(editPlanner)editPlanner.onclick=()=>{closeOverlay(true);openPanel();renderSetupBanner(true);};
+	  const out=$('mcOut'); if(out)out.onclick=()=>{
+	    mcState='landing';activeTab='today';
+	    selected.clear();required.clear();activeSection=null;writeHash();renderAll();
+	    auth.signOut();toast('Signed out');
+	  };
+	}
+
+/* ============================ .ICS CALENDAR EXPORT ============================ */
+function exportICS(){
+  const courses=myCourses();
+  if(!courses.length){toast('Pick courses first');return;}
+  const dayNum={Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
+  const icsDay={Monday:'MO',Tuesday:'TU',Wednesday:'WE',Thursday:'TH',Friday:'FR',Saturday:'SA',Sunday:'SU'};
+  // next occurrence of each weekday from today
+  function nextDate(targetDow){
+    const d=new Date(); const diff=(targetDow - d.getDay() + 7)%7;
+    d.setDate(d.getDate()+diff); return d;
+  }
+  function fmt(d,hhmm){const[h,m]=hhmm.split(':');return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'T'+h+m+'00';}
+  // Explicit one-event-per-class, so there are ZERO false positives:
+  // bounded to the module window, and every holiday / mid-term / end-term day is simply never emitted.
+  const startD=dateFromKey(MODULE_START), endD=dateFromKey(MODULE_END);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const from = today>startD ? today : startD;     // only upcoming classes, within the module
+  let ev='', count=0;
+  courses.forEach(c=>c.sessions.forEach(s=>{
+    const dow=dayNum[s.day]; if(dow==null)return;
+    const end=s.e||s.end||s.start;
+    let d=new Date(from); d.setDate(d.getDate()+((dow - d.getDay() + 7)%7));   // first matching weekday
+    while(d<=endD){
+      const ds=dateKeyOf(d);
+      if(!isNoClassDate(ds)){                       // skip holidays + mid-term + end-term
+        const uid='mc-'+c.id+'-'+ds+'-'+s.start.replace(':','')+'@iimm';
+        ev+=`BEGIN:VEVENT\r\nUID:${uid}\r\nDTSTART;TZID=Asia/Kolkata:${fmt(d,s.start)}\r\nDTEND;TZID=Asia/Kolkata:${fmt(d,end)}\r\n`+
+            `SUMMARY:${(c.course||'').replace(/[,;\\]/g,' ')}\r\n`+
+            `LOCATION:Room ${(s.room||'').replace(/[,;\\]/g,' ')}\r\n`+
+            `DESCRIPTION:${((s.faculty||c.faculty.join(', '))||'').replace(/[,;\\]/g,' ')}\r\n`+
+            `BEGIN:VALARM\r\nTRIGGER:-PT15M\r\nACTION:DISPLAY\r\nDESCRIPTION:Class soon\r\nEND:VALARM\r\nEND:VEVENT\r\n`;
+        count++;
+      }
+      d.setDate(d.getDate()+7);
+    }
+  }));
+  if(!count){toast('Module 5 is over — no classes left to add');return;}
+  const ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MyClass//IIMM//EN\r\nCALSCALE:GREGORIAN\r\n'+ev+'END:VCALENDAR\r\n';
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-iimm-classes.ics';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  mcTrack('calendar_export',{events:count});
+  toast('Calendar file ready \u2014 open it to add all your Module 5 classes');
+}
+
+	/* ============================ CLASS NOTE / REMINDER (from the timetable) ============================ */
+	function openClassModal(cid){
+	  const c=byId(cid); if(!c)return;
+	  const modal=$('clsModal'); if(!modal)return;
+	  $('clsModalTtl').textContent=c.course;
+	  $('clsModalMeta').innerHTML=(c.sessions||[]).map(s=>`<span>${(DS[s.day]||s.day)} ${s.start}${s.room?(' · Room '+esc(s.room)):''}</span>`).join('');
+	  const ta=$('clsModalNote'), foot=$('clsModalFoot'), gate=$('clsModalGate');
+	  if(user){
+	    if(foot)foot.style.display='flex'; if(gate)gate.style.display='none';
+	    if(ta){ta.style.display=''; ta.value=notes[cid]||''; ta.dataset.cid=cid;}
+	  }else{
+	    if(ta)ta.style.display='none'; if(foot)foot.style.display='none'; if(gate)gate.style.display='block';
+	  }
+	  modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+	  if(user&&ta)setTimeout(()=>{try{ta.focus();}catch(e){}},60);
+	}
+	function closeClassModal(){ const m=$('clsModal'); if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true');} }
+
+	/* ============================ INIT ============================ */
+	window.__mcInit=function(){
+	  // wire the open button + overlay chrome (always works, even pre-Firebase)
+	  const ob=$('mcOpen'); if(ob)ob.onclick=()=>{
+	    if(!user){showAuthGate();return;}
+	    if(!hasReadyTimetable()){renderSetupBanner(true);openPanel();return;}
+	    openOverlay(false);
+	  };
+	  const cb=$('mcClose'); if(cb)cb.onclick=()=>closeOverlay(false);
+	  const hb=$('mcHome'); if(hb)hb.onclick=()=>closeOverlay(false);
+	  wireSetupBanner();
+	  window.__afterPlannerRender=schedulePlannerSave;
+	  $('mcTabs').querySelectorAll('.mc-tab').forEach(b=>{
+	    b.onclick=()=>{activeTab=b.dataset.tab;backfillOpen=false;render();mcTrack('tab_view',{tab:b.dataset.tab});};
+	  });
+	  document.addEventListener('keydown',e=>{if(e.key==='Escape'){ if($('clsModal')&&$('clsModal').classList.contains('open'))closeClassModal(); else if($('mcOverlay').classList.contains('open'))closeOverlay(false);} });
+	  // click any class block on the timetable to add a note / reminder
+	  document.addEventListener('click',e=>{
+	    const blk=e.target.closest&&e.target.closest('.blk[data-cid],.mblk[data-cid]');
+	    if(blk){const cid=+blk.dataset.cid; if(!isNaN(cid))openClassModal(cid);}
+	  });
+	  const clsX=$('clsModalX'); if(clsX)clsX.onclick=closeClassModal;
+	  const clsModal=$('clsModal'); if(clsModal)clsModal.addEventListener('click',e=>{ if(e.target===clsModal)closeClassModal(); });
+	  const clsLogin=$('clsModalLogin'); if(clsLogin)clsLogin.onclick=()=>{ closeClassModal(); showAuthGate(); };
+	  const clsSave=$('clsModalSave'); if(clsSave)clsSave.onclick=()=>{
+	    const ta=$('clsModalNote'); if(!ta||!user)return;
+	    const cid=+ta.dataset.cid; notes[cid]=ta.value; saveNotes();
+	    if(activeTab) render();
+	    mcTrack('class_note_save',{from:'timetable'});
+	    toast('Note saved'); closeClassModal();
+	  };
+	  // flush device mirror to the cloud the moment the connection returns
+	  window.addEventListener('online',()=>{ if(user&&db){ saveAttendance(); saveNotes(); savePlannerData({},true); } });
+	  window.addEventListener('offline',()=>{ if(user)setSync('offline'); });
+	  // coming back from the "verify in junk folder" tab → pick up the verification and start syncing
+	  document.addEventListener('visibilitychange',()=>{
+	    if(document.hidden||!user||!db||user.emailVerified)return;
+	    refreshAuth().then(()=>{
+	      if(user&&user.emailVerified){
+	        updateAuthButton(); renderSetupBanner();
+	        saveAttendance(); saveNotes(); savePlannerData({},true);
+	        toast('Email verified — syncing now');
+	        if($('mcOverlay').classList.contains('open'))render();
+	      }
+	    });
+	  });
+	  if(!initFirebase()){
+	    plannerHydrated=true;
+	    showAuthGate();
+	  }
+	};
+
+// run init once the DOM is ready (self-contained, no edit to original script needed)
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',window.__mcInit);
+}else{
+  window.__mcInit();
+}
+})();
+
+</script>
+</body>
+</html>
