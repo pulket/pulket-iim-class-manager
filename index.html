@@ -1264,6 +1264,7 @@ const FIREBASE_CONFIG = {
 		const MICROCREDIT_COURSES = ['business ethics'];  // lowercase substrings → 10-class courses
 		const PLANNER_DRAFT_KEY = 'iimmodule5:lastPlanner';
 		const LAST_AUTH_EMAIL_KEY = 'iimmodule5:lastAuthEmail';
+		const AUTH_RETURN_KEY = 'iimmodule5:googleAuthReturn';
 		const ATT_KEY_BASE   = 'iimmodule5:attendance';
 		const NOTES_KEY_BASE = 'iimmodule5:notes';
 		/* ---- academic calendar (Module V, 2026): no classes on these ---- */
@@ -1369,6 +1370,7 @@ async function refreshAuth(){
 
 /* ---------- Firebase state ---------- */
 	let fb=null, auth=null, db=null, user=null, profile=null;
+	let authReady=Promise.resolve();
 		let attendance={}, notes={};        // local mirrors of Firestore docs
 		let activeTab='today';
 		let backfillOpen=false, backfillDate='';   // "add past attendance" sub-view
@@ -1384,9 +1386,9 @@ async function refreshAuth(){
 	    fb=firebase.initializeApp(FIREBASE_CONFIG);
 	    auth=firebase.auth();
 	    db=firebase.firestore();
-	    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+	    authReady=auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e=>console.warn('auth persistence setup failed',e));
 	    auth.onAuthStateChanged(onAuthChange);
-	    auth.getRedirectResult().then(result=>{
+	    authReady.then(()=>auth.getRedirectResult()).then(result=>{
 	      if(result&&result.user)completeGoogleSignIn(result,true);
 	    }).catch(e=>{
 	      if(e&&e.code!=='auth/no-auth-event')authErr(e);
@@ -1470,6 +1472,12 @@ async function refreshAuth(){
 	  user=u||null;
 	  plannerHydrated=false;
 	  if(user){
+	    const wasGateLocked=gateLocked;
+	    gateLocked=false;
+	    mcState='landing';
+	    if(wasGateLocked&&$('mcOverlay')&&$('mcOverlay').classList.contains('open')){
+	      closeOverlay(true);
+	    }
 	    $('mcAvatar').style.display='none';
 	    refreshAuth().then(loadUserData).then(()=>{
 	      plannerHydrated=true;
@@ -1666,6 +1674,7 @@ async function saveNotes(){
 	  pendingAuthFlow='login';
 	  verificationNotice='';
 	  rememberAuthEmail(cleanEmail);
+	  try{localStorage.removeItem(AUTH_RETURN_KEY);}catch(e){}
 	  const profileSeed={
 	    name:u.displayName||cleanEmail.split('@')[0],
 	    roll:rollFromEmail(cleanEmail),
@@ -1689,8 +1698,10 @@ async function saveNotes(){
 	  }
 	  mcTrack('login_google',{college_email:cleanEmail.endsWith('@'+ALLOWED_DOMAIN)?'yes':'no',redirect:fromRedirect?'yes':'no'});
 	  toast('Signed in with Google');
+	  try{await u.getIdToken(true);}catch(e){}
 	  updateAuthButton();
 	  renderSetupBanner();
+	  settleProviderAuthUi();
 	  return true;
 	}
 
@@ -1699,17 +1710,16 @@ async function saveNotes(){
 	  try{
 	    setAuthStatus('Opening Google sign-in...', 'info');
 	    pendingAuthFlow='login';
+	    await authReady;
 	    const provider=googleProvider();
-	    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.matchMedia('(max-width: 760px)').matches;
-	    if(mobile){
-	      await auth.signInWithRedirect(provider);
-	      return true;
-	    }
 	    const result=await auth.signInWithPopup(provider);
 	    return await completeGoogleSignIn(result,false);
 	  }catch(e){
-	    if(e&&e.code==='auth/popup-blocked'){
+	    const fallbackCodes=['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'];
+	    if(e&&fallbackCodes.includes(e.code)){
 	      setAuthStatus('Popup blocked — redirecting to Google...', 'info');
+	      try{localStorage.setItem(AUTH_RETURN_KEY,String(Date.now()));}catch(_){}
+	      await authReady;
 	      await auth.signInWithRedirect(googleProvider());
 	      return true;
 	    }
@@ -1796,6 +1806,7 @@ async function saveNotes(){
 	  const flow=pendingAuthFlow;
 	  pendingAuthFlow='';
 	  gateLocked=false;
+	  mcState='landing';
 	  renderSetupBanner(flow==='signup');
 	  if(!hasTimetable()||flow==='signup'){
 	    closeOverlay(true);
@@ -1810,6 +1821,20 @@ async function saveNotes(){
 	    return;
 	  }
 	  if($('mcOverlay').classList.contains('open'))render();
+	}
+	function settleProviderAuthUi(){
+	  pendingAuthFlow='';
+	  gateLocked=false;
+	  mcState='landing';
+	  renderSetupBanner(false);
+	  if(hasReadyTimetable()){
+	    activeTab='today';
+	    backfillOpen=false;
+	    openOverlay(false);
+	  }else{
+	    closeOverlay(true);
+	    setTimeout(()=>{if(window.innerWidth<=1000)openPanel();},120);
+	  }
 	}
 	function updateAuthButton(){
 	  const btn=$('mcOpen'); if(!btn)return;
