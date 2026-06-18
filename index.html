@@ -1526,10 +1526,6 @@ async function saveNotes(){
 	  el.textContent=msg||'';
 	  el.className='mc-status '+(type||'info');
 	}
-	function emailActionSettings(){
-	  if(!/^https?:$/.test(location.protocol))return undefined;
-	  return {url:location.origin+location.pathname,handleCodeInApp:false};
-	}
 	function rememberAuthEmail(email){
 	  try{localStorage.setItem(LAST_AUTH_EMAIL_KEY,(email||'').trim().toLowerCase());}catch(e){}
 	}
@@ -1556,7 +1552,7 @@ async function saveNotes(){
 	async function sendVerificationEmail(targetUser,email,showStatus){
 	  if(!targetUser||targetUser.emailVerified)return true;
 	  try{
-	    await targetUser.sendEmailVerification(emailActionSettings());
+	    await targetUser.sendEmailVerification();
 	    verificationNotice='Verification email sent to '+(email||targetUser.email)+'. It can take a minute — and please check your spam/junk folder if you don’t see it.';
 	    if(showStatus)setAuthStatus(verificationNotice,'ok');
 	    return true;
@@ -1636,7 +1632,7 @@ async function saveNotes(){
 	      return;
 	    }
 	    setAuthStatus('Sending password reset email...', 'info');
-	    await auth.sendPasswordResetEmail(cleanEmail,emailActionSettings());
+	    await auth.sendPasswordResetEmail(cleanEmail);
 	    rememberAuthEmail(cleanEmail);
 	    const msg=hasKnownPassword
 	      ? 'Password reset link sent to '+cleanEmail+'. Check your inbox — and your spam/junk folder if you don’t see it.'
