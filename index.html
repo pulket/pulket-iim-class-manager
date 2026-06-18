@@ -524,6 +524,9 @@ input[type=file]{display:none}
   border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--sh-s);transition:.15s;white-space:nowrap}
 .mc-homebtn:hover{border-color:#cdd2dd;box-shadow:var(--sh-m)}
 .mc-homebtn svg{width:16px;height:16px;stroke-width:2}
+.mc-calbtn{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(46,84,240,.28)}
+.mc-calbtn:hover{border-color:var(--accent);box-shadow:0 8px 22px rgba(46,84,240,.34)}
+.mc-calbtn svg{color:#fff}
 /* quick actions row (Today) + backfill */
 .mc-actions{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
 .mc-actbtn{flex:1;min-width:150px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);
@@ -776,6 +779,7 @@ a.mc-cta svg{flex:0 0 auto}
     <span class="sp"></span>
     <span class="mc-sync" id="mcSync" style="display:none"><i></i><span class="lbl">Synced</span></span>
     <button class="mc-homebtn" id="mcHome" title="See your full timetable" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/></svg><span class="lbl">Timetable</span></button>
+    <button class="mc-homebtn mc-calbtn" id="mcCalendarTop" title="Export to calendar" aria-label="Export to calendar" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M9 16l2 2 4-4"/></svg><span class="lbl">Calendar</span></button>
     <img class="mc-avatar" id="mcAvatar" alt="" style="display:none">
     <button class="mc-xbtn" id="mcClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
@@ -1713,6 +1717,8 @@ async function saveNotes(){
 	  if(close)close.style.display = loggedIn ? 'flex' : 'none';
 	  const home=$('mcHome');
 	  if(home)home.style.display = loggedIn ? 'inline-flex' : 'none';
+	  const calendarTop=$('mcCalendarTop');
+	  if(calendarTop)calendarTop.style.display = loggedIn ? 'inline-flex' : 'none';
 	  setSync(syncStatus);
 
 	  if(!loggedIn){
@@ -2203,10 +2209,7 @@ function renderMess(){
   return `<div class="mc-h">Account</div>
     <div class="mc-arow"><div style="font-size:14px"><b>${safe(nm||'\u2014')}</b><br>
       <span style="color:var(--ink-3);font-size:12.5px">${safe(rl)} \u00b7 ${safe(e)}</span></div></div>
-    <div class="mc-h" style="margin-top:20px">Calendar</div>
-    <div class="mc-sub">Adds <b>every Module 5 class</b> (from now until 29 Aug) to your phone\u2019s calendar, with a reminder before each one. Holidays and exam days are skipped automatically.</div>
-	    <button class="mc-ics" id="mcIcs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M9 16l2 2 4-4"/></svg>Add all my Module 5 classes</button>
-	    <button class="mc-signout" id="mcEditPlanner" style="color:var(--ink);margin-top:10px">Edit timetable</button>
+	    <button class="mc-signout" id="mcEditPlanner" style="color:var(--ink)">Edit timetable</button>
 	    <button class="mc-signout" id="mcOut">Sign out</button>
 	    <div class="mc-sub" style="margin-top:18px;text-align:center">Made by Pulkit with \u2764\ufe0f</div>`;
 	}
@@ -2276,7 +2279,6 @@ function wireBody(){
 	  $('mcContent').querySelectorAll('.bf-extra-add').forEach(b=>{ b.onclick=()=>{ const wrap=b.closest('.bf-extra'); const sel=wrap&&wrap.querySelector('select'); if(!sel)return; const cid=+sel.value; const date=(wrap&&wrap.dataset.date)||backfillDate||todayKey(); const key=date+'|'+cid+'|x'+Date.now(); attendance[key]=b.dataset.status; saveAttendance(); render(); mcTrack('extra_class_add',{status:b.dataset.status}); toast('Extra class added'); }; });
 	  $('mcContent').querySelectorAll('.bf-extra-del').forEach(b=>{ b.onclick=()=>{ delete attendance[b.dataset.key]; saveAttendance(); render(); toast('Removed'); }; });
 	  // more-tab buttons
-	  const ics=$('mcIcs'); if(ics)ics.onclick=exportICS;
 	  const planner=$('mcGoPlanner'); if(planner)planner.onclick=()=>{closeOverlay(true);openPanel();renderSetupBanner(true);};
 	  const editPlanner=$('mcEditPlanner'); if(editPlanner)editPlanner.onclick=()=>{closeOverlay(true);openPanel();renderSetupBanner(true);};
 	  const out=$('mcOut'); if(out)out.onclick=()=>{
@@ -2359,6 +2361,7 @@ function exportICS(){
 	  };
 	  const cb=$('mcClose'); if(cb)cb.onclick=()=>closeOverlay(false);
 	  const hb=$('mcHome'); if(hb)hb.onclick=()=>closeOverlay(false);
+	  const cal=$('mcCalendarTop'); if(cal)cal.onclick=exportICS;
 	  wireSetupBanner();
 	  window.__afterPlannerRender=schedulePlannerSave;
 	  $('mcTabs').querySelectorAll('.mc-tab').forEach(b=>{
