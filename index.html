@@ -1387,7 +1387,7 @@ async function refreshAuth(){
 	    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 	    auth.onAuthStateChanged(onAuthChange);
 	    auth.getRedirectResult().then(result=>{
-	      if(result&&result.user)completeMicrosoftSignIn(result,true);
+	      if(result&&result.user)completeGoogleSignIn(result,true);
 	    }).catch(e=>{
 	      if(e&&e.code!=='auth/no-auth-event')authErr(e);
 	    });
@@ -1531,23 +1531,24 @@ async function saveNotes(){
 	  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return false;
 	  return !REQUIRE_COLLEGE_EMAIL || e.endsWith('@'+ALLOWED_DOMAIN);
 	}
-	function authIsMicrosoft(u){
-	  return !!(u&&u.providerData&&u.providerData.some(p=>p&&p.providerId==='microsoft.com'));
+	function authIsGoogle(u){
+	  return !!(u&&u.providerData&&u.providerData.some(p=>p&&p.providerId==='google.com'));
 	}
 	function authIsTrusted(u){
-	  return !!(u&&(u.emailVerified||authIsMicrosoft(u)));
+	  return !!(u&&(u.emailVerified||authIsGoogle(u)));
 	}
 	function rollFromEmail(email){
 	  const m=String(email||'').match(/(?:^|[._-])(\d{6,})(?=@)/);
 	  return m?m[1]:'';
 	}
-	function microsoftEmailFromResult(result){
+	function googleEmailFromResult(result){
 	  const p=(result&&result.additionalUserInfo&&result.additionalUserInfo.profile)||{};
-	  return String((result&&result.user&&result.user.email)||p.mail||p.userPrincipalName||p.email||p.preferred_username||'').trim().toLowerCase();
+	  return String((result&&result.user&&result.user.email)||p.email||'').trim().toLowerCase();
 	}
-	function microsoftProvider(){
-	  const provider=new firebase.auth.OAuthProvider('microsoft.com');
-	  provider.setCustomParameters({tenant:'organizations',prompt:'select_account'});
+	function googleProvider(){
+	  const provider=new firebase.auth.GoogleAuthProvider();
+	  // Always show the account chooser; allow any Google account (no domain lock).
+	  provider.setCustomParameters({prompt:'select_account'});
 	  return provider;
 	}
 	function emailRuleText(){
@@ -1578,9 +1579,9 @@ async function saveNotes(){
 	    'auth/operation-not-allowed':'Sign-up is temporarily unavailable. Please try again later.',
 	    'auth/network-request-failed':'Network problem. Check your connection and try again.',
 	    'auth/unauthorized-domain':'Sign-in isn’t enabled for this web address yet. Please try again later.',
-	    'auth/account-exists-with-different-credential':'This email already has an account. Log in with your existing method once, then we can link Microsoft.',
-	    'auth/popup-blocked':'Popup was blocked. Redirecting to Microsoft sign-in.',
-	    'auth/popup-closed-by-user':'Microsoft sign-in was closed before finishing.',
+	    'auth/account-exists-with-different-credential':'This email already has an account. Log in with your existing method once, then we can link Google.',
+	    'auth/popup-blocked':'Popup was blocked. Redirecting to Google sign-in.',
+	    'auth/popup-closed-by-user':'Google sign-in was closed before finishing.',
 	    'auth/quota-exceeded':'We’ve hit today’s email limit. Please try again later.',
 	    'auth/internal-error':'Something went wrong on our end. Please try again.'
 	  };
@@ -1646,17 +1647,18 @@ async function saveNotes(){
 		  }catch(e){authErr(e);return false;}
 		}
 
-	async function completeMicrosoftSignIn(result,fromRedirect){
+	async function completeGoogleSignIn(result,fromRedirect){
 	  const u=result&&result.user;
-	  const cleanEmail=microsoftEmailFromResult(result);
+	  const cleanEmail=googleEmailFromResult(result);
 	  if(!u||!cleanEmail){
-	    setAuthStatus('Microsoft did not return an email address. Try email/password instead.','bad');
-	    toast('Microsoft did not return an email');
+	    setAuthStatus('Google did not return an email address. Try email/password instead.','bad');
+	    toast('Google did not return an email');
 	    return false;
 	  }
-	  if(!emailOk(cleanEmail)){
+	  // Google sign-in is allowed from any domain — only sanity-check the email format.
+	  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)){
 	    await auth.signOut().catch(()=>{});
-	    const msg='Use your @'+ALLOWED_DOMAIN+' Microsoft account';
+	    const msg='That Google account did not return a usable email.';
 	    setAuthStatus(msg,'bad');
 	    toast(msg);
 	    return false;
@@ -1668,7 +1670,7 @@ async function saveNotes(){
 	    name:u.displayName||cleanEmail.split('@')[0],
 	    roll:rollFromEmail(cleanEmail),
 	    email:cleanEmail,
-	    authProvider:'microsoft.com',
+	    authProvider:'google.com',
 	    emailVerified:true,
 	    updatedAt:Date.now()
 	  };
@@ -1685,36 +1687,36 @@ async function saveNotes(){
 	  }catch(e){
 	    handleSyncError(e,true);
 	  }
-	  mcTrack('login_microsoft',{college_email:'yes',redirect:fromRedirect?'yes':'no'});
-	  toast('Signed in with Microsoft');
+	  mcTrack('login_google',{college_email:cleanEmail.endsWith('@'+ALLOWED_DOMAIN)?'yes':'no',redirect:fromRedirect?'yes':'no'});
+	  toast('Signed in with Google');
 	  updateAuthButton();
 	  renderSetupBanner();
 	  return true;
 	}
 
-	async function doMicrosoftLogin(){
+	async function doGoogleLogin(){
 	  if(!auth)return false;
 	  try{
-	    setAuthStatus('Opening Microsoft sign-in...', 'info');
+	    setAuthStatus('Opening Google sign-in...', 'info');
 	    pendingAuthFlow='login';
-	    const provider=microsoftProvider();
+	    const provider=googleProvider();
 	    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.matchMedia('(max-width: 760px)').matches;
 	    if(mobile){
 	      await auth.signInWithRedirect(provider);
 	      return true;
 	    }
 	    const result=await auth.signInWithPopup(provider);
-	    return await completeMicrosoftSignIn(result,false);
+	    return await completeGoogleSignIn(result,false);
 	  }catch(e){
 	    if(e&&e.code==='auth/popup-blocked'){
-	      setAuthStatus('Popup blocked — redirecting to Microsoft...', 'info');
-	      await auth.signInWithRedirect(microsoftProvider());
+	      setAuthStatus('Popup blocked — redirecting to Google...', 'info');
+	      await auth.signInWithRedirect(googleProvider());
 	      return true;
 	    }
 	    if(e&&e.code==='auth/operation-not-allowed'){
-	      const msg='Microsoft sign-in is not enabled in Firebase yet';
+	      const msg='Google sign-in is not enabled in Firebase yet';
 	      setAuthStatus(msg,'bad');
-	      toast('Enable Microsoft login in Firebase');
+	      toast('Enable Google login in Firebase');
 	      return false;
 	    }
 	    authErr(e);
@@ -1887,7 +1889,7 @@ function renderLanding(){
       <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
       <h2>Your week, sorted.</h2>
       <p>Attendance, daily schedule, class notes and calendar reminders \u2014 in one place, for IIM Mumbai.</p>
-      <button class="mc-msbtn" id="auMicrosoftLanding"><svg viewBox="0 0 23 23" fill="none"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+      <button class="mc-msbtn" id="auGoogleLanding"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.574l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>Continue with Google</button>
       <div class="mc-or">or</div>
       <button class="mc-cta" id="auStart">Get started</button>
       <button class="mc-linkbtn" id="auHaveAcc" style="margin-top:12px">I already have an account</button>
@@ -1900,7 +1902,7 @@ function renderLanding(){
         </div>`).join('')}
 	    </div>
 	    <div class="mc-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="M9 12l2 2 4-4"/></svg>
-	      Private to you. Sign in with IIM Mumbai Microsoft or your college email.</div>
+	      Private to you. Sign in with Google or your college email.</div>
 	  </div>`;
 	}
 
@@ -1914,7 +1916,7 @@ function renderForm(){
       <button class="${isLogin?'':'on'}" data-m="signup">Sign up</button>
     </div>
     <div style="text-align:left;display:flex;flex-direction:column;gap:11px;margin-top:18px">
-      <button class="mc-msbtn" id="auMicrosoft"><svg viewBox="0 0 23 23" fill="none"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+      <button class="mc-msbtn" id="auGoogle"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.574l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>Continue with Google</button>
       <div class="mc-or">or use email</div>
       ${isLogin?'':`
         <label class="mc-lab">Full name</label>
@@ -1953,7 +1955,7 @@ function wireAuth(){
   // landing
   const start=$('auStart'); if(start)start.onclick=()=>{mcState='signup';render();};
   const have=$('auHaveAcc'); if(have)have.onclick=()=>{mcState='login';render();};
-  const msLanding=$('auMicrosoftLanding'); if(msLanding)msLanding.onclick=doMicrosoftLogin;
+  const gLanding=$('auGoogleLanding'); if(gLanding)gLanding.onclick=doGoogleLogin;
   // sent screen
   const toLogin=$('auToLogin'); if(toLogin)toLogin.onclick=()=>{mcState='login';render();};
   const reSignup=$('auReSignup'); if(reSignup)reSignup.onclick=()=>{mcState='signup';render();};
@@ -1963,7 +1965,7 @@ function wireAuth(){
     b.onclick=()=>{mcState=b.dataset.m;render();};
   });
 	  // password show/hide
-	  const ms=$('auMicrosoft'); if(ms)ms.onclick=doMicrosoftLogin;
+	  const g=$('auGoogle'); if(g)g.onclick=doGoogleLogin;
 	  const eye=$('auEye'); if(eye)eye.onclick=()=>{const i=$('auPw'); if(!i)return; const show=i.type==='password'; i.type=show?'text':'password'; eye.classList.toggle('on',show); try{i.focus();}catch(e){}};
 	  // focus the first empty field for faster entry
 	  setTimeout(()=>{const nm=$('auName'), em=$('auEmail'); const first=(nm&&!nm.value)?nm:((em&&!em.value)?em:$('auPw')); try{first&&first.focus({preventScroll:true});}catch(e){}},60);
